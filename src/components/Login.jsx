@@ -104,19 +104,7 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="test-credentials">
-          <h3>Test Credentials:</h3>
-          <div className="credential-item">
-            <strong>Superadmin:</strong>
-            <p>Email: test@gmail.com</p>
-            <p>Password: om</p>
-          </div>
-          <div className="credential-item">
-            <strong>Admin:</strong>
-            <p>Email: rajesh@electronics.com</p>
-            <p>Password: SecurePass123</p>
-          </div>
-        </div>
+        {/* Test credentials box removed */}
       </div>
       <Toast 
         message={toast.message} 
