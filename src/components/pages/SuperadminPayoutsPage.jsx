@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import superadminPaymentService from '../../services/superadminPaymentService';
-import Navbar from '../Navbar';
+import Sidebar from '../Sidebar';
 import './PageLayout.css';
 
 const SuperadminPayoutsPage = () => {
@@ -41,12 +41,11 @@ const SuperadminPayoutsPage = () => {
   };
 
   return (
-    <div className="page-container">
-      <Navbar />
-      
+    <div className="page-container with-sidebar">
+      <Sidebar />
       <main className="page-main">
         <div className="page-header">
-          <h1>💰 Admin Payouts</h1>
+          <h1>Admin Payouts</h1>
           <p>Approve or reject payout requests from merchants</p>
           <div className="header-actions">
             <button onClick={fetchPayouts} disabled={loading} className="refresh-btn">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { FiLock, FiZap, FiSmartphone } from 'react-icons/fi';
 import paymentService from '../../services/paymentService';
-import Navbar from '../Navbar';
+import Sidebar from '../Sidebar';
 import './PageLayout.css';
 import Toast from '../ui/Toast';
 
@@ -64,12 +65,11 @@ const PaymentsPage = () => {
   };
 
   return (
-    <div className="page-container">
-      <Navbar />
-      
+    <div className="page-container with-sidebar">
+      <Sidebar />
       <main className="page-main">
         <div className="page-header">
-          <h1>🔗 Payment Links</h1>
+          <h1>Payment Links</h1>
           <p>Create and manage payment links for your customers</p>
           <div className="header-actions">
             <button 
@@ -205,21 +205,21 @@ const PaymentsPage = () => {
             <h3>Payment Link Information</h3>
             <div className="info-cards">
               <div className="info-card">
-                <div className="info-icon">🔒</div>
+                <div className="info-icon"><FiLock /></div>
                 <div className="info-content">
                   <h4>Secure Payments</h4>
                   <p>All payments are processed securely with industry-standard encryption.</p>
                 </div>
               </div>
               <div className="info-card">
-                <div className="info-icon">⚡</div>
+                <div className="info-icon"><FiZap /></div>
                 <div className="info-content">
                   <h4>Instant Processing</h4>
                   <p>Payment links are generated instantly and ready to use immediately.</p>
                 </div>
               </div>
               <div className="info-card">
-                <div className="info-icon">📱</div>
+                <div className="info-icon"><FiSmartphone /></div>
                 <div className="info-content">
                   <h4>Mobile Friendly</h4>
                   <p>Payment links work seamlessly on all devices and platforms.</p>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import superadminPaymentService from '../../services/superadminPaymentService';
-import Navbar from '../Navbar';
+import Sidebar from '../Sidebar';
 import './PageLayout.css';
 
 const SuperadminTransactionsPage = () => {
@@ -38,13 +38,12 @@ const SuperadminTransactionsPage = () => {
   };
 
   return (
-    <div className="page-container">
-      <Navbar />
-      
+    <div className="page-container with-sidebar">
+      <Sidebar />
       <main className="page-main">
         <div className="page-header">
           <div>
-            <h1>📊 Admin Transactions</h1>
+          <h1>Admin Transactions</h1>
             <p>Filter by merchant and status to audit payments</p>
           </div>
           <div className="header-actions">

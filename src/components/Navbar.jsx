@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+import { FiMenu, FiLogOut, FiUser } from 'react-icons/fi';
+import { MdDashboard, MdPayments } from 'react-icons/md';
+import { RiMoneyDollarCircleLine } from 'react-icons/ri';
+import { TbArrowsTransferDown } from 'react-icons/tb';
+import { HiOutlineChartBar } from 'react-icons/hi2';
 import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '../services/authService';
 import { USER_ROLES } from '../constants/api';
@@ -63,7 +68,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <button className="menu-trigger" onClick={() => setMenuOpen((v) => !v)} aria-label="Toggle navigation">☰</button>
+        <button className="menu-trigger" onClick={() => setMenuOpen((v) => !v)} aria-label="Toggle navigation"><FiMenu /></button>
         <h2>{getDashboardTitle()}</h2>
         <Badge tone={authService.getRole() === USER_ROLES.SUPERADMIN ? 'warning' : 'success'}>
           {authService.getRole() === USER_ROLES.SUPERADMIN ? 'Superadmin' : 'Admin'}
@@ -86,7 +91,7 @@ const Navbar = () => {
       <div className="navbar-actions">
         <div className="profile" onBlur={() => setOpen(false)} tabIndex={0}>
           <button className="profile-trigger" onClick={() => setOpen((v) => !v)}>
-            <span className="avatar" aria-hidden>🧑‍💼</span>
+            <span className="avatar" aria-hidden><FiUser /></span>
             <span className="profile-label">Account</span>
           </button>
           {open && (
@@ -98,7 +103,7 @@ const Navbar = () => {
           )}
         </div>
         <button onClick={handleLogout} className="logout-btn">
-          <span className="logout-icon">🚪</span>
+          <span className="logout-icon"><FiLogOut /></span>
           Logout
         </button>
       </div>

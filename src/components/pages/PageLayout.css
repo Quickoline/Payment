@@ -95,6 +95,41 @@
   gap: 30px;
 }
 
+/* Transactions tabs + filters */
+.tabs {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  padding: 6px;
+  display: inline-flex;
+  gap: 6px;
+  align-self: flex-start;
+}
+.tab {
+  padding: 10px 24px;
+  border-radius: 9999px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+}
+.tab.active { background: var(--primary); color: #fff; }
+
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.filter-input { flex: 1; min-width: 220px; }
+.filter-date { min-width: 210px; }
+.filter-select { min-width: 120px; padding: 12px 14px; border: 2px solid var(--border); border-radius: 8px; background: var(--card); }
+
+.table-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: auto; }
+.tx-table { width: 100%; border-collapse: collapse; }
+.tx-table th, .tx-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.tx-table thead th { position: sticky; top: 0; background: #eef5ff; z-index: 1; }
+
 /* Loading States */
 .loading-state {
   display: flex;
@@ -139,11 +174,11 @@
 }
 
 .success-message {
-  background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
+  background: #eef6ff;
+  color: var(--primary);
   padding: 16px;
   border-radius: 8px;
-  border: 1px solid rgba(16, 185, 129, 0.35);
+  border: 1px solid #dbe7ff;
   font-size: 14px;
 }
 
