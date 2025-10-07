@@ -32,7 +32,7 @@
 }
 
 .refresh-btn, .create-btn, .request-btn {
-  background: #667eea;
+  background: var(--primary);
   color: white;
   border: none;
   padding: 8px 16px;
@@ -44,7 +44,7 @@
 }
 
 .refresh-btn:hover, .create-btn:hover, .request-btn:hover {
-  background: #5a6fd8;
+  background: var(--primary-2);
 }
 
 .refresh-btn:disabled, .create-btn:disabled, .request-btn:disabled {
@@ -129,7 +129,7 @@
 
 .transaction-status {
   background: #e3f2fd;
-  color: #1976d2;
+  color: #1d4ed8;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;

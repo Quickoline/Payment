@@ -1,5 +1,7 @@
 // API Constants
-export const BASE_URL = "https://api.ninex-group.com/api";
+
+export const BASE_URL = 'https://api.ninex-group.com/api';
+ e8a86750ce2fd74751f7819ec49f19569a5a7b98
 
 export const API_ENDPOINTS = {
   LOGIN: `${BASE_URL}/auth/login`,

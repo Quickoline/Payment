@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { RiMoneyDollarCircleLine } from 'react-icons/ri';
 import paymentService from '../../services/paymentService';
 import './PaymentSection.css';
 
@@ -88,7 +89,7 @@ const PayoutSection = () => {
   return (
     <div className="payment-section">
       <div className="section-header">
-        <h3>💰 Payouts</h3>
+      <h3>Payouts</h3>
         <div className="section-actions">
           <button onClick={fetchPayouts} disabled={loading} className="refresh-btn">
             {loading ? 'Loading...' : 'Refresh'}
@@ -178,7 +179,7 @@ const PayoutSection = () => {
             ))
           ) : (
             <div className="empty-state">
-              <div className="empty-icon">💰</div>
+              <div className="empty-icon"><RiMoneyDollarCircleLine /></div>
               <p>No payouts found</p>
             </div>
           )}

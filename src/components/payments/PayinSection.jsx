@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FiCreditCard } from 'react-icons/fi';
 import paymentService from '../../services/paymentService';
 import './PaymentSection.css';
 
@@ -28,7 +29,7 @@ const PayinSection = () => {
   return (
     <div className="payment-section">
       <div className="section-header">
-        <h3>💳 Balance</h3>
+      <h3>Balance</h3>
         <button onClick={fetchBalance} disabled={loading} className="refresh-btn">
           {loading ? 'Loading...' : 'Refresh'}
         </button>
@@ -78,7 +79,7 @@ const PayinSection = () => {
         </div>
       ) : (
         <div className="empty-state">
-          <div className="empty-icon">💳</div>
+          <div className="empty-icon"><FiCreditCard /></div>
           <p>Unable to fetch balance information</p>
         </div>
       )}

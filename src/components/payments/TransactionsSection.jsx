@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { HiOutlineClipboardDocumentList } from 'react-icons/hi2';
 import paymentService from '../../services/paymentService';
 import './PaymentSection.css';
 
@@ -28,7 +29,7 @@ const TransactionsSection = () => {
   return (
     <div className="payment-section">
       <div className="section-header">
-        <h3>📊 Transactions</h3>
+      <h3>Transactions</h3>
         <button onClick={fetchTransactions} disabled={loading} className="refresh-btn">
           {loading ? 'Loading...' : 'Refresh'}
         </button>
@@ -56,7 +57,7 @@ const TransactionsSection = () => {
             ))
           ) : (
             <div className="empty-state">
-              <div className="empty-icon">📋</div>
+          <div className="empty-icon"><HiOutlineClipboardDocumentList /></div>
               <p>No transactions found</p>
             </div>
           )}

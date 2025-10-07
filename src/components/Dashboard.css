@@ -46,6 +46,59 @@
   padding: 40px 20px;
 }
 
+/* Top Stats - blu theme */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 16px;
+  min-width: 360px;
+}
+
+.stat-card {
+  background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+  border: 1px solid #dbe7ff;
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 10px rgba(30, 64, 175, 0.08);
+}
+
+.stat-card.primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  color: #ffffff;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.stat-card.primary .stat-label {
+  color: rgba(255,255,255,0.9);
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 6px;
+}
+
+.stat-card.primary .stat-value {
+  color: #ffffff;
+}
+
+.stat-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.stat-card.primary .stat-sub {
+  color: rgba(255,255,255,0.85);
+}
+
 .coming-soon-card {
   background: white;
   border-radius: 16px;
@@ -120,10 +173,11 @@
 }
 
 .api-key-section {
-  background: white;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+  border: 1px solid #dbe7ff;
   border-radius: 16px;
   padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(30, 64, 175, 0.12);
 }
 
 .api-key-section h2 {
@@ -145,7 +199,7 @@
 }
 
 .create-api-key-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
   color: white;
   border: none;
   padding: 14px 28px;
@@ -154,6 +208,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.25);
 }
 
 .create-api-key-btn:hover:not(:disabled) {
@@ -184,11 +239,18 @@
   border: 1px solid #c3e6c3;
 }
 
+/* Blu theme override for success inside API key section */
+.api-key-section .success-message {
+  color: var(--primary);
+  background: #eef6ff;
+  border: 1px solid #dbe7ff;
+}
+
 .api-key-display {
-  background: #f8f9fa;
+  background: #ffffff;
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #dbe7ff;
 }
 
 .api-key-display h3 {
@@ -207,33 +269,43 @@
 .api-key-input {
   flex: 1;
   padding: 12px 16px;
-  border: 2px solid #e1e5e9;
+  border: 2px solid #dbe7ff;
   border-radius: 8px;
   font-size: 14px;
   font-family: 'Courier New', monospace;
-  background: white;
+  background: #ffffff;
 }
 
 .api-key-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .copy-btn {
-  background: #28a745;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
   color: white;
   border: none;
-  padding: 12px 20px;
+  padding: 12px 16px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: filter 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.copy-btn:hover {
-  background: #218838;
+.copy-btn:hover { filter: brightness(1.05); }
+
+/* Ensure Admin API key copy button uses blue theme even if a generic .copy-btn exists elsewhere */
+.api-key-display .copy-btn {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+  color: #fff;
+  border: none;
 }
+.api-key-display .copy-btn:hover { filter: brightness(1.05); }
 
 .api-key-warning {
   color: #856404;
@@ -261,7 +333,7 @@
 }
 
 .get-api-key-btn {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
   color: white;
   border: none;
   padding: 14px 28px;
@@ -271,11 +343,12 @@
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.25);
 }
 
 .get-api-key-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.35);
 }
 
 .get-api-key-btn:disabled {
@@ -292,6 +365,13 @@
   font-size: 14px;
   margin: 0;
   font-weight: 500;
+}
+
+/* Blu theme override for info inside API key section */
+.api-key-section .api-key-info {
+  color: var(--primary);
+  background: #eef6ff;
+  border: 1px solid #dbe7ff;
 }
 
 .endpoint-not-available {
@@ -379,6 +459,42 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-top: 30px;
 }
+
+/* Home overview widgets like screenshot */
+.overview-widgets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  gap: 16px;
+}
+.overview-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+  height: 140px; /* compact square */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.overview-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(30, 64, 175, 0.18); }
+.overview-card.primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%); color: #fff; border: none; }
+.overview-card.primary .metric-label, .overview-card.primary .metric-sub { color: rgba(255,255,255,0.9); }
+.overview-card.primary .metric-value { color: #fff; }
+
+/* Hover blue effect for all cards, matching primary look */
+.overview-card:not(.primary):hover {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+  color: #fff;
+  border: none;
+}
+.overview-card:not(.primary):hover .metric-label,
+.overview-card:not(.primary):hover .metric-sub { color: rgba(255,255,255,0.9); }
+.overview-card:not(.primary):hover .metric-value { color: #fff; }
+.overview-card .metric-label { color: var(--muted); font-size: 12px; font-weight: 600; }
+.overview-card .metric-value { font-size: 22px; font-weight: 700; color: var(--text); margin-top: 4px; }
+.overview-card .metric-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
 .quick-access h2 {
   color: #333;
@@ -512,6 +628,10 @@
   .header-content {
     flex-direction: column;
     gap: 15px;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
   }
   
   .header-content h1 {

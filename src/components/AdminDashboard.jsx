@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { HiOutlineChartBar } from 'react-icons/hi2';
+import { FiCopy } from 'react-icons/fi';
+import { TbArrowsTransferDown } from 'react-icons/tb';
+import { RiMoneyDollarCircleLine } from 'react-icons/ri';
+import { MdPayments } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import apiKeyService from '../services/apiKeyService';
-import Navbar from './Navbar';
+import Sidebar from './Sidebar';
 import './Dashboard.css';
 
 const AdminDashboard = () => {
@@ -109,16 +114,41 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="page-container">
-      <Navbar />
-      
+    <div className="page-container with-sidebar">
+      <Sidebar />
       <main className="page-main">
         <div className="page-header">
-          <h1>🏠 Admin Dashboard</h1>
-          <p>Welcome to your admin dashboard. Manage API keys and access all payment features.</p>
+          <div>
+            <h1>🏠 Admin Dashboard</h1>
+            <p>Welcome to your admin dashboard. Manage API keys and access all payment features.</p>
+          </div>
+          <div className="overview-widgets">
+            <div className="overview-card primary">
+              <div className="metric-label">Today's Payin</div>
+              <div className="metric-value">₹0.00</div>
+              <div className="metric-sub">0 Transactions</div>
+            </div>
+            <div className="overview-card">
+              <div className="metric-label">Today's Payout</div>
+              <div className="metric-value">₹0.00</div>
+              <div className="metric-sub">0 Transactions</div>
+            </div>
+            <div className="overview-card">
+              <div className="metric-label">Total Transactions</div>
+              <div className="metric-value">0</div>
+              <div className="metric-sub">0% Daily Growth Rate</div>
+            </div>
+            <div className="overview-card">
+              <div className="metric-label">Debit Balance</div>
+              <div className="metric-value">₹0</div>
+              <div className="metric-sub">Wallet</div>
+            </div>
+          </div>
         </div>
         
         <div className="page-content">
+          
+
           {/* API Key Management Section */}
           <div className="api-key-section">
             <h2>API Key Management</h2>
@@ -178,6 +208,7 @@ const AdminDashboard = () => {
                     className="api-key-input"
                   />
                   <button onClick={copyToClipboard} className="copy-btn">
+                    <FiCopy />
                     Copy
                   </button>
                 </div>
@@ -195,25 +226,25 @@ const AdminDashboard = () => {
             
             <div className="access-grid">
               <div className="access-card" onClick={() => navigate('/admin/transactions')}>
-                <div className="access-icon">📊</div>
+                <div className="access-icon"><HiOutlineChartBar /></div>
                 <h3>Transactions</h3>
                 <p>View and manage all payment transactions</p>
               </div>
               
               <div className="access-card" onClick={() => navigate('/admin/payouts')}>
-                <div className="access-icon">💰</div>
+                <div className="access-icon"><TbArrowsTransferDown /></div>
                 <h3>Payouts</h3>
                 <p>Manage payout requests and history</p>
               </div>
               
               <div className="access-card" onClick={() => navigate('/admin/payins')}>
-                <div className="access-icon">💳</div>
+                <div className="access-icon"><RiMoneyDollarCircleLine /></div>
                 <h3>Payins</h3>
                 <p>View account balance and financial overview</p>
               </div>
               
               <div className="access-card" onClick={() => navigate('/admin/payments')}>
-                <div className="access-icon">🔗</div>
+                <div className="access-icon"><MdPayments /></div>
                 <h3>Payments</h3>
                 <p>Create and manage payment links</p>
               </div>

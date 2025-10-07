@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import signupService from '../../services/signupService';
-import Navbar from '../Navbar';
+import Sidebar from '../Sidebar';
 import './PageLayout.css';
 import Toast from '../ui/Toast';
 
@@ -92,12 +92,11 @@ const SuperadminSignupPage = () => {
   };
 
   return (
-    <div className="page-container">
-      <Navbar />
-      
+    <div className="page-container with-sidebar">
+      <Sidebar />
       <main className="page-main">
         <div className="page-header">
-          <h1>👥 User Registration</h1>
+          <h1>User Registration</h1>
           <p>Create merchant/admin accounts with complete business details</p>
         </div>
         

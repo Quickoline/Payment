@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { RiMoneyDollarCircleLine } from 'react-icons/ri';
 import paymentService from '../../services/paymentService';
-import Navbar from '../Navbar';
+import Sidebar from '../Sidebar';
 import './PageLayout.css';
 import Toast from '../ui/Toast';
 
@@ -116,12 +117,11 @@ const PayoutsPage = () => {
   };
 
   return (
-    <div className="page-container">
-      <Navbar />
-      
+    <div className="page-container with-sidebar">
+      <Sidebar />
       <main className="page-main">
         <div className="page-header">
-          <h1>💰 Payouts</h1>
+          <h1>Payouts</h1>
           <p>Manage payout requests and view payout history</p>
           <div className="header-actions">
             <button onClick={fetchPayouts} disabled={loading} className="refresh-btn">
@@ -255,7 +255,7 @@ const PayoutsPage = () => {
                 </div>
               ) : (
                 <div className="empty-state">
-                  <div className="empty-icon">💰</div>
+                  <div className="empty-icon"><RiMoneyDollarCircleLine /></div>
                   <h3>No Payouts Found</h3>
                   <p>No payout requests have been made yet.</p>
                 </div>

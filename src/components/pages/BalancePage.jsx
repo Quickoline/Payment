@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { RiMoneyDollarCircleLine } from 'react-icons/ri';
+import { HiOutlineChartBar } from 'react-icons/hi2';
+import { TbArrowsTransferDown } from 'react-icons/tb';
+import { FiLock, FiClock, FiTrendingUp, FiCreditCard } from 'react-icons/fi';
 import paymentService from '../../services/paymentService';
-import Navbar from '../Navbar';
+import Sidebar from '../Sidebar';
 import './PageLayout.css';
 
 const BalancePage = () => {
@@ -27,12 +31,11 @@ const BalancePage = () => {
   };
 
   return (
-    <div className="page-container">
-      <Navbar />
-      
+    <div className="page-container with-sidebar">
+      <Sidebar />
       <main className="page-main">
         <div className="page-header">
-          <h1>💳 Payins</h1>
+          <h1>Payins</h1>
           <p>View your account balance and financial overview</p>
           <button onClick={fetchBalance} disabled={loading} className="refresh-btn">
             {loading ? 'Loading...' : 'Refresh'}
@@ -51,7 +54,7 @@ const BalancePage = () => {
             <div className="balance-container">
               <div className="balance-cards">
                 <div className="balance-card primary">
-                  <div className="balance-icon">💰</div>
+                  <div className="balance-icon"><RiMoneyDollarCircleLine /></div>
                   <div className="balance-amount">
                     ₹{balance.availableBalance || balance.balance || '0.00'}
                   </div>
@@ -60,7 +63,7 @@ const BalancePage = () => {
                 
                 {balance.pendingBalance && (
                   <div className="balance-card secondary">
-                    <div className="balance-icon">⏳</div>
+                    <div className="balance-icon"><FiClock /></div>
                     <div className="balance-amount">
                       ₹{balance.pendingBalance}
                     </div>
@@ -70,7 +73,7 @@ const BalancePage = () => {
                 
                 {balance.totalBalance && (
                   <div className="balance-card tertiary">
-                    <div className="balance-icon">📊</div>
+                    <div className="balance-icon"><HiOutlineChartBar /></div>
                     <div className="balance-amount">
                       ₹{balance.totalBalance}
                     </div>
@@ -83,7 +86,7 @@ const BalancePage = () => {
                 <h3>Account Information</h3>
                 <div className="details-grid">
                   <div className="detail-card">
-                    <div className="detail-icon">📈</div>
+                    <div className="detail-icon"><FiTrendingUp /></div>
                     <div className="detail-content">
                       <div className="detail-label">Account Status</div>
                       <div className="detail-value">{balance.status || 'Active'}</div>
@@ -91,7 +94,7 @@ const BalancePage = () => {
                   </div>
                   
                   <div className="detail-card">
-                    <div className="detail-icon">🕒</div>
+                    <div className="detail-icon"><FiClock /></div>
                     <div className="detail-content">
                       <div className="detail-label">Last Updated</div>
                       <div className="detail-value">{balance.lastUpdated || new Date().toLocaleDateString()}</div>
@@ -99,7 +102,7 @@ const BalancePage = () => {
                   </div>
                   
                   <div className="detail-card">
-                    <div className="detail-icon">🏦</div>
+                    <div className="detail-icon"><FiCreditCard /></div>
                     <div className="detail-content">
                       <div className="detail-label">Account Type</div>
                       <div className="detail-value">{balance.accountType || 'Business'}</div>
@@ -107,7 +110,7 @@ const BalancePage = () => {
                   </div>
                   
                   <div className="detail-card">
-                    <div className="detail-icon">🔒</div>
+                    <div className="detail-icon"><FiLock /></div>
                     <div className="detail-content">
                       <div className="detail-label">Security Level</div>
                       <div className="detail-value">{balance.securityLevel || 'High'}</div>
@@ -118,7 +121,7 @@ const BalancePage = () => {
             </div>
           ) : (
             <div className="empty-state">
-              <div className="empty-icon">💳</div>
+              <div className="empty-icon"><FiCreditCard /></div>
               <h3>Unable to Load Balance</h3>
               <p>There was an issue loading your balance information.</p>
             </div>
