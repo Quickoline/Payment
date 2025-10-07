@@ -1,5 +1,5 @@
 // API Constants
-export const BASE_URL = 'https://cashfree-backend-bkht.onrender.com/api';
+export const BASE_URL = "https://api.ninex-group.com/api";
 
 export const API_ENDPOINTS = {
   LOGIN: `${BASE_URL}/auth/login`,
