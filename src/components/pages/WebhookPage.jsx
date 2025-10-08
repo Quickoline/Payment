@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FiLink, FiCopy, FiCheck, FiPlus, FiTrash2, FiEdit } from 'react-icons/fi';
+import { FiLink, FiCopy, FiCheck, FiPlus, FiTrash2, FiEdit, FiPlay } from 'react-icons/fi';
 import Sidebar from '../Sidebar';
+import webhookService from '../../services/webhookService';
 import './PageLayout.css';
 import Toast from '../ui/Toast';
 
@@ -26,7 +27,10 @@ const WebhookPage = () => {
     { id: 'payment.captured', label: 'Payment Captured', description: 'Triggered when a payment is captured' },
     { id: 'payment.refunded', label: 'Payment Refunded', description: 'Triggered when a payment is refunded' },
     { id: 'payout.processed', label: 'Payout Processed', description: 'Triggered when a payout is processed' },
-    { id: 'payout.failed', label: 'Payout Failed', description: 'Triggered when a payout fails' }
+    { id: 'payout.failed', label: 'Payout Failed', description: 'Triggered when a payout fails' },
+    { id: 'payment_link.paid', label: 'Payment Link Paid', description: 'Triggered when a payment link is paid' },
+    { id: 'payment_link.cancelled', label: 'Payment Link Cancelled', description: 'Triggered when a payment link is cancelled' },
+    { id: 'payment_link.expired', label: 'Payment Link Expired', description: 'Triggered when a payment link expires' }
   ];
 
   useEffect(() => {
@@ -36,30 +40,8 @@ const WebhookPage = () => {
   const fetchWebhooks = async () => {
     setLoading(true);
     try {
-      // Mock data for now - replace with actual API call
-      const mockWebhooks = [
-        {
-          id: '1',
-          name: 'Main Payment Webhook',
-          url: 'https://yourdomain.com/webhook/payment',
-          events: ['payment.success', 'payment.failed'],
-          secret: 'whsec_1234567890abcdef',
-          isActive: true,
-          createdAt: '2024-01-15T10:30:00Z',
-          lastTriggered: '2024-01-20T14:22:00Z'
-        },
-        {
-          id: '2',
-          name: 'Payout Notifications',
-          url: 'https://yourdomain.com/webhook/payout',
-          events: ['payout.processed', 'payout.failed'],
-          secret: 'whsec_fedcba0987654321',
-          isActive: false,
-          createdAt: '2024-01-10T09:15:00Z',
-          lastTriggered: null
-        }
-      ];
-      setWebhooks(mockWebhooks);
+      const response = await webhookService.getWebhooks();
+      setWebhooks(response.webhooks || response || []);
     } catch (error) {
       setError('Failed to fetch webhooks');
       setToast({ message: 'Failed to fetch webhooks', type: 'error' });
@@ -103,24 +85,34 @@ const WebhookPage = () => {
         throw new Error('Please fill in all required fields');
       }
 
-      // Mock API call - replace with actual implementation
-      const newWebhook = {
-        id: Date.now().toString(),
-        ...webhookData,
-        secret: webhookData.secret || `whsec_${Math.random().toString(36).substring(2, 15)}`,
-        createdAt: new Date().toISOString(),
-        lastTriggered: null
+      // Validate URL format
+      try {
+        new URL(webhookData.url);
+      } catch {
+        throw new Error('Please enter a valid URL');
+      }
+
+      const webhookPayload = {
+        name: webhookData.name,
+        url: webhookData.url,
+        events: webhookData.events,
+        secret: webhookData.secret || undefined, // Let backend generate if empty
+        isActive: webhookData.isActive
       };
 
+      let result;
       if (editingWebhook) {
-        setWebhooks(prev => prev.map(w => w.id === editingWebhook.id ? newWebhook : w));
+        result = await webhookService.updateWebhook(editingWebhook.id, webhookPayload);
         setSuccess('Webhook updated successfully!');
         setToast({ message: 'Webhook updated successfully!', type: 'success' });
       } else {
-        setWebhooks(prev => [...prev, newWebhook]);
+        result = await webhookService.createWebhook(webhookPayload);
         setSuccess('Webhook created successfully!');
         setToast({ message: 'Webhook created successfully!', type: 'success' });
       }
+
+      // Refresh the webhooks list
+      await fetchWebhooks();
 
       setWebhookData({
         name: '',
@@ -154,9 +146,11 @@ const WebhookPage = () => {
   const handleDelete = async (webhookId) => {
     if (window.confirm('Are you sure you want to delete this webhook?')) {
       try {
-        setWebhooks(prev => prev.filter(w => w.id !== webhookId));
+        await webhookService.deleteWebhook(webhookId);
         setSuccess('Webhook deleted successfully!');
         setToast({ message: 'Webhook deleted successfully!', type: 'success' });
+        // Refresh the webhooks list
+        await fetchWebhooks();
       } catch (error) {
         setError('Failed to delete webhook');
         setToast({ message: 'Failed to delete webhook', type: 'error' });
@@ -171,14 +165,28 @@ const WebhookPage = () => {
 
   const toggleWebhookStatus = async (webhookId) => {
     try {
-      setWebhooks(prev => prev.map(w => 
-        w.id === webhookId ? { ...w, isActive: !w.isActive } : w
-      ));
+      const webhook = webhooks.find(w => w.id === webhookId);
+      if (!webhook) return;
+
+      await webhookService.toggleWebhookStatus(webhookId, !webhook.isActive);
       setSuccess('Webhook status updated!');
       setToast({ message: 'Webhook status updated!', type: 'success' });
+      // Refresh the webhooks list
+      await fetchWebhooks();
     } catch (error) {
       setError('Failed to update webhook status');
       setToast({ message: 'Failed to update webhook status', type: 'error' });
+    }
+  };
+
+  const testWebhook = async (webhookId) => {
+    try {
+      await webhookService.testWebhook(webhookId);
+      setSuccess('Test webhook sent successfully!');
+      setToast({ message: 'Test webhook sent successfully!', type: 'success' });
+    } catch (error) {
+      setError('Failed to send test webhook');
+      setToast({ message: 'Failed to send test webhook', type: 'error' });
     }
   };
 
@@ -189,6 +197,22 @@ const WebhookPage = () => {
         <div className="page-header">
           <h1>Webhook Management</h1>
           <p>Configure webhooks to receive real-time notifications about payment events</p>
+          <div className="webhook-info">
+            <div className="info-card">
+              <h4>🔗 Razorpay Webhook URL</h4>
+              <p>Configure this URL in your Razorpay Dashboard:</p>
+              <div className="url-display">
+                <code>https://api.ninex-group.com/api/razorpay/webhook</code>
+                <button 
+                  onClick={() => copyToClipboard('https://api.ninex-group.com/api/razorpay/webhook')}
+                  className="copy-btn small"
+                  title="Copy Razorpay webhook URL"
+                >
+                  <FiCopy />
+                </button>
+              </div>
+            </div>
+          </div>
           <div className="header-actions">
             <button 
               onClick={() => setShowAddForm(!showAddForm)} 
@@ -331,6 +355,13 @@ const WebhookPage = () => {
                           </span>
                         </div>
                         <div className="webhook-actions">
+                          <button 
+                            onClick={() => testWebhook(webhook.id)}
+                            className="action-btn test"
+                            title="Test webhook"
+                          >
+                            <FiPlay />
+                          </button>
                           <button 
                             onClick={() => handleEdit(webhook)}
                             className="action-btn edit"
