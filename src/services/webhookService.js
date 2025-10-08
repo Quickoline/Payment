@@ -44,9 +44,24 @@ class WebhookService {
         },
       });
 
-      return response.data;
+      // Handle different response structures
+      const data = response.data;
+      if (Array.isArray(data)) {
+        return { webhooks: data };
+      } else if (data.webhooks && Array.isArray(data.webhooks)) {
+        return data;
+      } else if (data.success && data.webhooks) {
+        return data;
+      } else {
+        // Return empty array if no webhooks found
+        return { webhooks: [] };
+      }
     } catch (error) {
       console.error('Webhooks fetch error:', error);
+      // If webhook endpoint doesn't exist yet, return empty array
+      if (error.response?.status === 404) {
+        return { webhooks: [] };
+      }
       throw new Error(this.getApiErrorMessage(error, 'Failed to fetch webhooks'));
     }
   }

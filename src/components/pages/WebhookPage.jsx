@@ -41,10 +41,17 @@ const WebhookPage = () => {
     setLoading(true);
     try {
       const response = await webhookService.getWebhooks();
-      setWebhooks(response.webhooks || response || []);
+      // Ensure we always have an array
+      const webhooksArray = Array.isArray(response) 
+        ? response 
+        : (response.webhooks || []);
+      setWebhooks(webhooksArray);
     } catch (error) {
+      console.error('Error fetching webhooks:', error);
       setError('Failed to fetch webhooks');
       setToast({ message: 'Failed to fetch webhooks', type: 'error' });
+      // Set empty array as fallback
+      setWebhooks([]);
     } finally {
       setLoading(false);
     }
@@ -342,7 +349,7 @@ const WebhookPage = () => {
             </div>
           ) : (
             <div className="webhooks-container">
-              {webhooks.length > 0 ? (
+              {Array.isArray(webhooks) && webhooks.length > 0 ? (
                 <div className="webhooks-grid">
                   {webhooks.map((webhook) => (
                     <div key={webhook.id} className="webhook-card">
