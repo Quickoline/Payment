@@ -11,7 +11,8 @@ const PaymentSection = () => {
     amount: '',
     customerName: '',
     customerEmail: '',
-    customerPhone: ''
+    customerPhone: '',
+    description: ''
   });
   const [createdLink, setCreatedLink] = useState(null);
 
@@ -21,12 +22,20 @@ const PaymentSection = () => {
     setError('');
     setSuccess('');
     
+    // Validate phone number
+    if (paymentData.customerPhone && paymentData.customerPhone.length !== 10) {
+      setError('Phone number must be exactly 10 digits');
+      setCreateLoading(false);
+      return;
+    }
+    
     try {
       const linkData = {
         amount: parseFloat(paymentData.amount),
         customerName: paymentData.customerName,
         customerEmail: paymentData.customerEmail,
-        customerPhone: paymentData.customerPhone
+        customerPhone: paymentData.customerPhone,
+        description: paymentData.description
       };
       
       const result = await paymentService.createPaymentLink(linkData);
@@ -36,7 +45,8 @@ const PaymentSection = () => {
         amount: '',
         customerName: '',
         customerEmail: '',
-        customerPhone: ''
+        customerPhone: '',
+        description: ''
       });
     } catch (error) {
       setError(error.message);
@@ -117,6 +127,18 @@ const PaymentSection = () => {
                   onChange={(e) => handleInputChange('customerPhone', e.target.value)}
                   required
                   placeholder="9876543210"
+                  maxLength="10"
+                />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Description (Optional)</label>
+                <input
+                  type="text"
+                  value={paymentData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Product purchase"
                 />
               </div>
             </div>

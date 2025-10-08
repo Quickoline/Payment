@@ -129,7 +129,16 @@ class PaymentService {
         throw new Error('API key not found');
       }
 
-      const response = await axios.post(API_ENDPOINTS.CREATE_LINK, paymentData, {
+      // Transform frontend data to match API specification
+      const requestBody = {
+        amount: paymentData.amount.toString(),
+        customer_name: paymentData.customerName,
+        customer_email: paymentData.customerEmail,
+        customer_phone: paymentData.customerPhone,
+        description: paymentData.description || 'Product purchase'
+      };
+
+      const response = await axios.post(API_ENDPOINTS.CREATE_LINK, requestBody, {
         headers: {
           'x-api-key': `${apiKey}`,
           'Content-Type': 'application/json',
@@ -138,22 +147,23 @@ class PaymentService {
 
       // Normalize API response for UI consumption
       const api = response.data || {};
-      const txn = api.transaction || {};
-      const pay = api.payment || {};
       const normalized = {
-        paymentLink: pay.paymentUrl || pay.url || null,
-        linkId: pay.linkId || txn.linkId || null,
-        orderId: txn.orderId || null,
-        transactionId: txn.transactionId || null,
-        amount: txn.amount ?? paymentData?.amount ?? null,
-        currency: txn.currency || 'INR',
-        status: txn.status || 'created',
-        customerName: txn.customerName || paymentData?.customerName || null,
-        merchantName: txn.merchantName || null,
-        createdAt: txn.createdAt || null,
-        qrCode: pay.qrCode || null,
-        expiresAt: pay.expiresAt || null,
+        paymentLink: api.payment_url || null,
+        linkId: api.payment_link_id || null,
+        orderId: api.transaction_id || null,
+        transactionId: api.transaction_id || null,
+        amount: api.order_amount || paymentData?.amount || null,
+        currency: api.order_currency || 'INR',
+        status: 'created',
+        customerName: paymentData?.customerName || null,
+        merchantName: api.merchant_name || null,
+        merchantId: api.merchant_id || null,
+        referenceId: api.reference_id || null,
+        createdAt: new Date().toISOString(),
+        qrCode: null, // Not provided in this API
+        expiresAt: api.expires_at ? new Date(api.expires_at * 1000).toISOString() : null,
         message: api.message || 'Payment link created successfully',
+        success: api.success || false,
         // Preserve raw for any advanced views
         raw: api,
       };

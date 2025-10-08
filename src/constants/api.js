@@ -11,7 +11,7 @@ export const API_ENDPOINTS = {
   TRANSACTIONS: `${BASE_URL}/payments/transactions`,
   PAYOUTS: `${BASE_URL}/payments/merchant/payouts`,
   BALANCE: `${BASE_URL}/payments/merchant/balance`,
-  CREATE_LINK: `${BASE_URL}/payments/create-link`,
+  CREATE_LINK: `${BASE_URL}/razorpay/create-payment-link`,
   PAYMENT_STATUS: (orderId) => `${BASE_URL}/payments/status/${orderId}`,
   REFUND: (orderId) => `${BASE_URL}/payments/refund/${orderId}`,
   PAYOUT_REQUEST: `${BASE_URL}/payments/merchant/payout/request`,
