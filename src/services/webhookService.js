@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_ENDPOINTS } from '../constants/api';
+import { BASE_URL } from '../constants/api';
 import authService from './authService';
 
 class WebhookService {
@@ -37,7 +37,7 @@ class WebhookService {
         throw new Error('API key not found');
       }
 
-      const response = await axios.get(`${API_ENDPOINTS.BASE_URL}/webhooks`, {
+      const response = await axios.get(`${BASE_URL}/webhooks`, {
         headers: {
           'x-api-key': `${apiKey}`,
           'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ class WebhookService {
         throw new Error('API key not found');
       }
 
-      const response = await axios.post(`${API_ENDPOINTS.BASE_URL}/webhooks`, webhookData, {
+      const response = await axios.post(`${BASE_URL}/webhooks`, webhookData, {
         headers: {
           'x-api-key': `${apiKey}`,
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ class WebhookService {
         throw new Error('API key not found');
       }
 
-      const response = await axios.put(`${API_ENDPOINTS.BASE_URL}/webhooks/${webhookId}`, webhookData, {
+      const response = await axios.put(`${BASE_URL}/webhooks/${webhookId}`, webhookData, {
         headers: {
           'x-api-key': `${apiKey}`,
           'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ class WebhookService {
         throw new Error('API key not found');
       }
 
-      const response = await axios.delete(`${API_ENDPOINTS.BASE_URL}/webhooks/${webhookId}`, {
+      const response = await axios.delete(`${BASE_URL}/webhooks/${webhookId}`, {
         headers: {
           'x-api-key': `${apiKey}`,
           'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ class WebhookService {
         throw new Error('API key not found');
       }
 
-      const response = await axios.patch(`${API_ENDPOINTS.BASE_URL}/webhooks/${webhookId}/status`, {
+      const response = await axios.patch(`${BASE_URL}/webhooks/${webhookId}/status`, {
         isActive
       }, {
         headers: {
@@ -174,7 +174,7 @@ class WebhookService {
         throw new Error('API key not found');
       }
 
-      const response = await axios.post(`${API_ENDPOINTS.BASE_URL}/webhooks/${webhookId}/test`, {}, {
+      const response = await axios.post(`${BASE_URL}/webhooks/${webhookId}/test`, {}, {
         headers: {
           'x-api-key': `${apiKey}`,
           'Content-Type': 'application/json',
@@ -198,7 +198,7 @@ class WebhookService {
         throw new Error('API key not found');
       }
 
-      const response = await axios.get(`${API_ENDPOINTS.BASE_URL}/webhooks/${webhookId}/events`, {
+      const response = await axios.get(`${BASE_URL}/webhooks/${webhookId}/events`, {
         headers: {
           'x-api-key': `${apiKey}`,
           'Content-Type': 'application/json',
