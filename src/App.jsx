@@ -10,6 +10,7 @@ import PaymentsPage from './components/pages/PaymentsPage';
 import SuperadminSignupPage from './components/pages/SuperadminSignupPage';
 import SuperadminTransactionsPage from './components/pages/SuperadminTransactionsPage';
 import SuperadminPayoutsPage from './components/pages/SuperadminPayoutsPage';
+import WebhookPage from './components/pages/WebhookPage';
 import AuthWrapper from './components/AuthWrapper';
 import { USER_ROLES } from './constants/api';
 
@@ -87,6 +88,14 @@ function App() {
           element={
             <AuthWrapper requiredRole={USER_ROLES.ADMIN}>
               <PaymentsPage />
+            </AuthWrapper>
+          } 
+        />
+        <Route 
+          path="/admin/webhooks" 
+          element={
+            <AuthWrapper requiredRole={USER_ROLES.ADMIN}>
+              <WebhookPage />
             </AuthWrapper>
           } 
         />

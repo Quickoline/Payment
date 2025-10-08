@@ -53,11 +53,11 @@
 }
 
 .request-btn {
-  background: #28a745;
+  background: var(--primary);
 }
 
 .request-btn:hover {
-  background: #218838;
+  background: var(--primary-2);
 }
 
 /* Loading and Error States */
@@ -124,7 +124,7 @@
 .transaction-amount {
   font-size: 18px;
   font-weight: 700;
-  color: #28a745;
+  color: var(--primary);
 }
 
 .transaction-status {
@@ -325,12 +325,12 @@
 }
 
 .form-actions button[type="submit"] {
-  background: #28a745;
+  background: var(--primary);
   color: white;
 }
 
 .form-actions button[type="submit"]:hover {
-  background: #218838;
+  background: var(--primary-2);
 }
 
 .form-actions button:disabled {
@@ -340,8 +340,8 @@
 
 /* Created Link Display */
 .created-link {
-  background: #d4edda;
-  border: 1px solid #c3e6cb;
+  background: #eef6ff;
+  border: 1px solid #dbe7ff;
   border-radius: 8px;
   padding: 20px;
   margin-top: 20px;
@@ -349,7 +349,7 @@
 
 .created-link h4 {
   margin: 0 0 16px 0;
-  color: #155724;
+  color: var(--primary);
 }
 
 .link-details {
@@ -366,7 +366,7 @@
 
 .link-item label {
   font-weight: 500;
-  color: #155724;
+  color: var(--primary);
 }
 
 .link-container {
@@ -377,30 +377,49 @@
 .link-input {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid #c3e6cb;
+  border: 1px solid #dbe7ff;
   border-radius: 4px;
   background: white;
   font-family: 'Courier New', monospace;
   font-size: 12px;
 }
 
-.link-container button {
-  background: #28a745;
+.action-btn {
+  background: var(--primary);
   color: white;
   border: none;
   padding: 8px 12px;
   border-radius: 4px;
   font-size: 12px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  transition: all 0.2s ease;
 }
 
-.link-container button:hover {
-  background: #218838;
+.action-btn:hover {
+  background: var(--primary-2);
+  transform: translateY(-1px);
+}
+
+.action-btn.copy {
+  background: var(--primary);
+}
+
+.action-btn.redirect {
+  background: var(--primary);
+}
+
+.action-btn.redirect:hover {
+  background: var(--primary-2);
 }
 
 .link-value {
   font-weight: 600;
-  color: #155724;
+  color: var(--primary);
   font-size: 16px;
 }
 

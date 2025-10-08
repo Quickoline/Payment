@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiMenu, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiLogOut, FiLink } from 'react-icons/fi';
 import { MdDashboard, MdPayments } from 'react-icons/md';
 import { RiMoneyDollarCircleLine } from 'react-icons/ri';
 import { TbArrowsTransferDown } from 'react-icons/tb';
@@ -33,6 +33,7 @@ const Sidebar = () => {
       { path: '/admin/payouts', label: 'Payouts', icon: <TbArrowsTransferDown /> },
       { path: '/admin/payins', label: 'Payins', icon: <RiMoneyDollarCircleLine /> },
       { path: '/admin/payments', label: 'Payments', icon: <MdPayments /> },
+      { path: '/admin/webhooks', label: 'Webhooks', icon: <FiLink /> },
     ];
   };
 

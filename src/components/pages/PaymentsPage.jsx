@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiLock, FiZap, FiSmartphone } from 'react-icons/fi';
+import { FiLock, FiZap, FiSmartphone, FiExternalLink, FiCopy } from 'react-icons/fi';
 import paymentService from '../../services/paymentService';
 import Sidebar from '../Sidebar';
 import './PageLayout.css';
@@ -73,6 +73,12 @@ const PaymentsPage = () => {
     navigator.clipboard.writeText(text);
     setSuccess('Link copied to clipboard!');
     setToast({ message: 'Link copied to clipboard!', type: 'success' });
+  };
+
+  const openPaymentLink = (url) => {
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -181,8 +187,19 @@ const PaymentsPage = () => {
                       readOnly 
                       className="link-input"
                     />
-                    <button onClick={() => copyToClipboard(createdLink.paymentLink || createdLink.link)} className="copy-btn">
-                      Copy
+                    <button 
+                      onClick={() => copyToClipboard(createdLink.paymentLink || createdLink.link)} 
+                      className="copy-btn"
+                      title="Copy link"
+                    >
+                      <FiCopy />
+                    </button>
+                    <button 
+                      onClick={() => openPaymentLink(createdLink.paymentLink || createdLink.link)} 
+                      className="copy-btn redirect"
+                      title="Open payment link"
+                    >
+                      <FiExternalLink />
                     </button>
                   </div>
                 </div>
@@ -201,8 +218,12 @@ const PaymentsPage = () => {
                       readOnly 
                       className="link-input"
                     />
-                    <button onClick={() => copyToClipboard(createdLink.orderId || createdLink.id)} className="copy-btn">
-                      Copy
+                    <button 
+                      onClick={() => copyToClipboard(createdLink.orderId || createdLink.id)} 
+                      className="copy-btn"
+                      title="Copy Order ID"
+                    >
+                      <FiCopy />
                     </button>
                   </div>
                 </div>

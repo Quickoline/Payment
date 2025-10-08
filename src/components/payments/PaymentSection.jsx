@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FiExternalLink, FiCopy } from 'react-icons/fi';
 import paymentService from '../../services/paymentService';
 import './PaymentSection.css';
 
@@ -65,6 +66,12 @@ const PaymentSection = () => {
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     setSuccess('Link copied to clipboard!');
+  };
+
+  const openPaymentLink = (url) => {
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -167,8 +174,19 @@ const PaymentSection = () => {
                   readOnly 
                   className="link-input"
                 />
-                <button onClick={() => copyToClipboard(createdLink.paymentLink || createdLink.link)}>
-                  Copy
+                <button 
+                  onClick={() => copyToClipboard(createdLink.paymentLink || createdLink.link)}
+                  className="action-btn copy"
+                  title="Copy link"
+                >
+                  <FiCopy />
+                </button>
+                <button 
+                  onClick={() => openPaymentLink(createdLink.paymentLink || createdLink.link)}
+                  className="action-btn redirect"
+                  title="Open payment link"
+                >
+                  <FiExternalLink />
                 </button>
               </div>
             </div>
@@ -181,8 +199,12 @@ const PaymentSection = () => {
                   readOnly 
                   className="link-input"
                 />
-                <button onClick={() => copyToClipboard(createdLink.orderId || createdLink.id)}>
-                  Copy
+                <button 
+                  onClick={() => copyToClipboard(createdLink.orderId || createdLink.id)}
+                  className="action-btn copy"
+                  title="Copy Order ID"
+                >
+                  <FiCopy />
                 </button>
               </div>
             </div>
