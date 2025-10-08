@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BASE_URL } from '../constants/api';
+import { API_ENDPOINTS } from '../constants/api';
 import authService from './authService';
 
 class WebhookService {
@@ -17,167 +17,73 @@ class WebhookService {
     );
   }
 
-  // Get API key for authorization
-  async getApiKey() {
+  // Get JWT token for authentication
+  async getAuthToken() {
     try {
-      const apiKeyData = await import('./apiKeyService').then(module => module.default.getApiKey());
-      return apiKeyData;
+      const token = authService.getToken();
+      if (!token) {
+        throw new Error('Authentication required. Please login first.');
+      }
+      return token;
     } catch (error) {
-      throw new Error('API key required for this operation. Please create an API key first.');
+      throw new Error('Authentication required. Please login first.');
     }
   }
 
-  // Get all webhooks for the merchant
-  async getWebhooks() {
+  // Configure webhook
+  async configureWebhook(webhookData) {
     try {
-      const apiKeyData = await this.getApiKey();
-      const apiKey = apiKeyData.apiKey || apiKeyData.key;
+      const token = await this.getAuthToken();
       
-      if (!apiKey) {
-        throw new Error('API key not found');
-      }
+      const payload = {
+        webhook_url: webhookData.url,
+        events: webhookData.events
+      };
 
-      const response = await axios.get(`${BASE_URL}/webhooks`, {
+      const response = await axios.post(API_ENDPOINTS.WEBHOOK_CONFIGURE, payload, {
         headers: {
-          'x-api-key': `${apiKey}`,
           'Content-Type': 'application/json',
+          'x-auth-token': token,
         },
       });
 
-      // Handle different response structures
-      const data = response.data;
-      if (Array.isArray(data)) {
-        return { webhooks: data };
-      } else if (data.webhooks && Array.isArray(data.webhooks)) {
-        return data;
-      } else if (data.success && data.webhooks) {
-        return data;
-      } else {
-        // Return empty array if no webhooks found
-        return { webhooks: [] };
-      }
+      return response.data;
     } catch (error) {
-      console.error('Webhooks fetch error:', error);
-      // If webhook endpoint doesn't exist yet, return empty array
+      console.error('Webhook configuration error:', error);
+      throw new Error(this.getApiErrorMessage(error, 'Failed to configure webhook'));
+    }
+  }
+
+  // Get webhook configuration
+  async getWebhookConfig() {
+    try {
+      const token = await this.getAuthToken();
+
+      const response = await axios.get(API_ENDPOINTS.WEBHOOK_CONFIG, {
+        headers: {
+          'x-auth-token': token,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Webhook config fetch error:', error);
+      // If no webhook is configured, return null instead of throwing error
       if (error.response?.status === 404) {
-        return { webhooks: [] };
+        return null;
       }
-      throw new Error(this.getApiErrorMessage(error, 'Failed to fetch webhooks'));
+      throw new Error(this.getApiErrorMessage(error, 'Failed to fetch webhook configuration'));
     }
   }
 
-  // Create a new webhook
-  async createWebhook(webhookData) {
+  // Test webhook
+  async testWebhook() {
     try {
-      const apiKeyData = await this.getApiKey();
-      const apiKey = apiKeyData.apiKey || apiKeyData.key;
-      
-      if (!apiKey) {
-        throw new Error('API key not found');
-      }
+      const token = await this.getAuthToken();
 
-      const response = await axios.post(`${BASE_URL}/webhooks`, webhookData, {
+      const response = await axios.post(API_ENDPOINTS.WEBHOOK_TEST, {}, {
         headers: {
-          'x-api-key': `${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return response.data;
-    } catch (error) {
-      console.error('Webhook creation error:', error);
-      throw new Error(this.getApiErrorMessage(error, 'Failed to create webhook'));
-    }
-  }
-
-  // Update an existing webhook
-  async updateWebhook(webhookId, webhookData) {
-    try {
-      const apiKeyData = await this.getApiKey();
-      const apiKey = apiKeyData.apiKey || apiKeyData.key;
-      
-      if (!apiKey) {
-        throw new Error('API key not found');
-      }
-
-      const response = await axios.put(`${BASE_URL}/webhooks/${webhookId}`, webhookData, {
-        headers: {
-          'x-api-key': `${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return response.data;
-    } catch (error) {
-      console.error('Webhook update error:', error);
-      throw new Error(this.getApiErrorMessage(error, 'Failed to update webhook'));
-    }
-  }
-
-  // Delete a webhook
-  async deleteWebhook(webhookId) {
-    try {
-      const apiKeyData = await this.getApiKey();
-      const apiKey = apiKeyData.apiKey || apiKeyData.key;
-      
-      if (!apiKey) {
-        throw new Error('API key not found');
-      }
-
-      const response = await axios.delete(`${BASE_URL}/webhooks/${webhookId}`, {
-        headers: {
-          'x-api-key': `${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return response.data;
-    } catch (error) {
-      console.error('Webhook deletion error:', error);
-      throw new Error(this.getApiErrorMessage(error, 'Failed to delete webhook'));
-    }
-  }
-
-  // Toggle webhook status (activate/deactivate)
-  async toggleWebhookStatus(webhookId, isActive) {
-    try {
-      const apiKeyData = await this.getApiKey();
-      const apiKey = apiKeyData.apiKey || apiKeyData.key;
-      
-      if (!apiKey) {
-        throw new Error('API key not found');
-      }
-
-      const response = await axios.patch(`${BASE_URL}/webhooks/${webhookId}/status`, {
-        isActive
-      }, {
-        headers: {
-          'x-api-key': `${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      return response.data;
-    } catch (error) {
-      console.error('Webhook status toggle error:', error);
-      throw new Error(this.getApiErrorMessage(error, 'Failed to update webhook status'));
-    }
-  }
-
-  // Test webhook (send a test notification)
-  async testWebhook(webhookId) {
-    try {
-      const apiKeyData = await this.getApiKey();
-      const apiKey = apiKeyData.apiKey || apiKeyData.key;
-      
-      if (!apiKey) {
-        throw new Error('API key not found');
-      }
-
-      const response = await axios.post(`${BASE_URL}/webhooks/${webhookId}/test`, {}, {
-        headers: {
-          'x-api-key': `${apiKey}`,
-          'Content-Type': 'application/json',
+          'x-auth-token': token,
         },
       });
 
@@ -188,28 +94,33 @@ class WebhookService {
     }
   }
 
-  // Get webhook events (for testing/verification)
-  async getWebhookEvents(webhookId) {
+  // Delete webhook configuration
+  async deleteWebhook() {
     try {
-      const apiKeyData = await this.getApiKey();
-      const apiKey = apiKeyData.apiKey || apiKeyData.key;
-      
-      if (!apiKey) {
-        throw new Error('API key not found');
-      }
+      const token = await this.getAuthToken();
 
-      const response = await axios.get(`${BASE_URL}/webhooks/${webhookId}/events`, {
+      const response = await axios.delete(API_ENDPOINTS.WEBHOOK_DELETE, {
         headers: {
-          'x-api-key': `${apiKey}`,
-          'Content-Type': 'application/json',
+          'x-auth-token': token,
         },
       });
 
       return response.data;
     } catch (error) {
-      console.error('Webhook events fetch error:', error);
-      throw new Error(this.getApiErrorMessage(error, 'Failed to fetch webhook events'));
+      console.error('Webhook deletion error:', error);
+      throw new Error(this.getApiErrorMessage(error, 'Failed to delete webhook configuration'));
     }
+  }
+
+  // Get available webhook events
+  getAvailableEvents() {
+    return [
+      { id: 'payment.success', label: 'Payment Success', description: 'Payment completed successfully' },
+      { id: 'payment.failed', label: 'Payment Failed', description: 'Payment failed' },
+      { id: 'payment.pending', label: 'Payment Pending', description: 'Payment is pending' },
+      { id: 'payment.cancelled', label: 'Payment Cancelled', description: 'Payment cancelled by user' },
+      { id: 'payment.expired', label: 'Payment Expired', description: 'Payment link expired' }
+    ];
   }
 }
 

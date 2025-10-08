@@ -665,6 +665,53 @@
   margin: 20px 0;
 }
 
+.webhook-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.webhook-actions .secondary-btn,
+.webhook-actions .danger-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.webhook-actions .secondary-btn {
+  background: rgba(102, 126, 234, 0.1);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.webhook-actions .secondary-btn:hover {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.webhook-actions .danger-btn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.webhook-actions .danger-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.webhook-config-display {
+  margin-top: 24px;
+}
+
+.webhook-value {
+  color: var(--text);
+  font-weight: 500;
+}
+
 .webhook-info .info-card {
   background: linear-gradient(135deg, #eef6ff 0%, #d1e0ff 100%);
   border: 1px solid var(--primary);

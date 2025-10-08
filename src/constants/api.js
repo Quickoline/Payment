@@ -21,6 +21,12 @@ export const API_ENDPOINTS = {
   ADMIN_TRANSACTIONS: `${BASE_URL}/payments/admin/transactions`,
   ADMIN_PAYOUT: `${BASE_URL}/payments/admin/payout`,
   ADMIN_PAYOUTS: `${BASE_URL}/payments/admin/payouts`,
+  
+  // Webhook Endpoints
+  WEBHOOK_CONFIGURE: `${BASE_URL}/payments/merchant/webhook/configure`,
+  WEBHOOK_CONFIG: `${BASE_URL}/payments/merchant/webhook/config`,
+  WEBHOOK_TEST: `${BASE_URL}/payments/merchant/webhook/test`,
+  WEBHOOK_DELETE: `${BASE_URL}/payments/merchant/webhook`,
 };
 
 export const USER_ROLES = {
