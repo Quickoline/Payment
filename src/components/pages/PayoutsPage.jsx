@@ -17,6 +17,7 @@ import Toast from '../ui/Toast';
 const PayoutsPage = () => {
   const [payouts, setPayouts] = useState([]);
   const [payoutsSummary, setPayoutsSummary] = useState(null);
+  const [unsettledBalance, setUnsettledBalance] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showRequestForm, setShowRequestForm] = useState(false);
@@ -44,6 +45,7 @@ const PayoutsPage = () => {
   useEffect(() => {
     fetchPayouts();
     loadEligibility();
+    fetchUnsettledBalance();
   }, []);
 
   const loadEligibility = async () => {
@@ -58,6 +60,19 @@ const PayoutsPage = () => {
     } catch (e) {
       console.error('Error loading eligibility:', e);
     }
+  };
+
+  const fetchUnsettledBalance = async () => {
+    try {
+      const balance = await paymentService.getBalance();
+      setUnsettledBalance(balance);
+    } catch (error) {
+      console.error('Error fetching unsettled balance:', error);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return `₹${parseFloat(amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const fetchPayouts = async () => {
@@ -157,12 +172,6 @@ const PayoutsPage = () => {
     }
   };
 
-  const formatCurrency = (amount) => {
-    return `₹${parseFloat(amount || 0).toLocaleString('en-IN', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
-    })}`;
-  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -223,6 +232,28 @@ const PayoutsPage = () => {
           {error && (
             <div className="error-message">
               <FiAlertCircle /> {error}
+            </div>
+          )}
+
+          {/* Unsettled Amount Box */}
+          {unsettledBalance && (
+            <div className="unsettled-amount-card">
+              <div className="card-header">
+                <h3><FiClock /> Unsettled Amount</h3>
+                <button onClick={fetchUnsettledBalance} className="refresh-btn small">
+                  <FiRefreshCw />
+                </button>
+              </div>
+              <div className="card-content">
+                <div className="amount-display">
+                  <span className="amount-label">Available Balance</span>
+                  <span className="amount-value">{formatCurrency(unsettledBalance.availableBalance)}</span>
+                </div>
+                <div className="settlement-info">
+                  <FiInfo className="info-icon" />
+                  <span>Transactions get settled every 3:00 PM as per Indian time</span>
+                </div>
+              </div>
             </div>
           )}
 
