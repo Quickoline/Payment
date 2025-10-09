@@ -1,0 +1,393 @@
+/* Balance Page Specific Styles */
+
+.balance-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Balance Cards Grid */
+.balance-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.balance-card {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+  color: white;
+  padding: 24px;
+  border-radius: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.balance-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.balance-card.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.balance-card.secondary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.balance-card.tertiary {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.balance-card.quaternary {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.balance-icon {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.balance-content {
+  flex: 1;
+}
+
+.balance-label {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.balance-amount {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.balance-description {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Breakdown Section */
+.breakdown-section {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+}
+
+.breakdown-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breakdown-card {
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.breakdown-row.highlight {
+  background: rgba(250, 112, 154, 0.05);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 4px 0;
+}
+
+.breakdown-row.total {
+  background: rgba(102, 126, 234, 0.05);
+  padding: 16px 12px;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.breakdown-label {
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.breakdown-value {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.breakdown-value.success {
+  color: #10b981;
+}
+
+.breakdown-value.primary {
+  color: var(--primary);
+  font-size: 20px;
+}
+
+.breakdown-row.negative .breakdown-value {
+  color: #ef4444;
+}
+
+.breakdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* Commission Section */
+.commission-section {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+}
+
+.commission-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.commission-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.commission-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.commission-card:hover {
+  border-color: var(--primary);
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.commission-title {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.commission-rate {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.commission-description {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Summary Section */
+.summary-section {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+}
+
+.summary-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Eligibility Section */
+.eligibility-section {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+}
+
+.eligibility-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.eligibility-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.eligibility-status {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.status-badge.eligible {
+  background: #10b981;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-block;
+}
+
+.status-badge.not-eligible {
+  background: #ef4444;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-block;
+}
+
+.eligibility-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.eligibility-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+}
+
+.eligibility-label {
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.eligibility-value {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 14px;
+}
+
+/* Merchant Section */
+.merchant-section {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+}
+
+.merchant-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.merchant-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.merchant-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.merchant-detail:last-child {
+  border-bottom: none;
+}
+
+.merchant-label {
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.merchant-value {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.merchant-value.mono {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+}
+
+/* Spinning Animation */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .balance-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .commission-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .eligibility-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .merchant-card {
+    grid-template-columns: 1fr;
+  }
+}

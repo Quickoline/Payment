@@ -74,50 +74,44 @@ class PaymentService {
   }
 
   // Payin Section - requires JWT authorization
-  async getBalance() {
-    try {
-      const token = authService.getToken();
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await axios.get(API_ENDPOINTS.BALANCE, {
-        headers: {
-          'x-auth-token': `${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      // Normalize API response to a frontend-friendly shape
-      const api = response.data || {};
-      const bal = api.balance || {};
-      const normalized = {
-        // Commonly displayed top-level values expected by the UI
-        availableBalance: bal.available_balance ?? bal.availableBalance ?? '0.00',
-        pendingBalance: bal.pending_payouts ?? bal.pendingBalance ?? '0.00',
-        totalBalance: bal.total_revenue ?? bal.totalBalance ?? '0.00',
-
-        // Additional useful fields preserved
-        commissionDeducted: bal.commission_deducted ?? null,
-        commissionRate: bal.commission_rate ?? null,
-        netRevenue: bal.net_revenue ?? null,
-        totalPaidOut: bal.total_paid_out ?? null,
-
-        // Pass-through sections for detailed views if needed
-        transactionSummary: api.transaction_summary || {},
-        payoutEligibility: api.payout_eligibility || {},
-        merchant: api.merchant || {},
-
-        // Keep raw in case pages need exact backend fields
-        raw: api,
-      };
-
-      return normalized;
-    } catch (error) {
-      console.error('Balance fetch error:', error);
-      throw new Error(this.getApiErrorMessage(error, 'Failed to fetch balance'));
+ async getBalance() {
+  try {
+    const token = authService.getToken();
+    if (!token) {
+      throw new Error('No authentication token found');
     }
+
+    const response = await axios.get(API_ENDPOINTS.BALANCE, {
+      headers: {
+        'x-auth-token': `${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const api = response.data || {};
+    const bal = api.balance || {};
+    
+    const normalized = {
+      availableBalance: bal.available_balance ?? '0.00',
+      pendingBalance: bal.pending_payouts ?? '0.00',
+      totalBalance: bal.total_revenue ?? '0.00',
+      commissionDeducted: bal.commission_deducted ?? '0.00',
+      commissionRate: bal.commission_rate ?? null,
+      netRevenue: bal.net_revenue ?? '0.00',
+      totalPaidOut: bal.total_paid_out ?? '0.00',
+      transactionSummary: api.transaction_summary || {},
+      payoutEligibility: api.payout_eligibility || {},
+      merchant: api.merchant || {},
+      raw: api,
+    };
+
+    return normalized;
+  } catch (error) {
+    console.error('Balance fetch error:', error);
+    throw new Error(this.getApiErrorMessage(error, 'Failed to fetch balance'));
   }
+}
+
 
   // Create Payment Link - requires API key + body data
   async createPaymentLink(paymentData) {
