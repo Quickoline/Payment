@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { HiOutlineChartBar } from 'react-icons/hi2';
-import { FiCopy } from 'react-icons/fi';
+import { FiCopy, FiRefreshCw, FiDollarSign } from 'react-icons/fi';
 import { TbArrowsTransferDown } from 'react-icons/tb';
 import { RiMoneyDollarCircleLine } from 'react-icons/ri';
 import { MdPayments } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import apiKeyService from '../services/apiKeyService';
+import paymentService from '../services/paymentService';
 import Sidebar from './Sidebar';
 import './Dashboard.css';
 
@@ -18,12 +19,77 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [hasApiKey, setHasApiKey] = useState(false);
+  
+  // Dashboard stats
+  const [dashboardStats, setDashboardStats] = useState({
+    balance: null,
+    transactions: null,
+    payouts: null,
+    loading: true
+  });
 
-
-  // Check for existing API key on component mount
   useEffect(() => {
     checkExistingApiKey();
+    fetchDashboardStats();
   }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      setDashboardStats(prev => ({ ...prev, loading: true }));
+
+      // ✅ Fetch balance (requires JWT token only)
+      let balanceData = null;
+      let transactionsData = null;
+      let payoutsData = null;
+
+      try {
+        balanceData = await paymentService.getBalance();
+        console.log('✅ Balance fetched:', balanceData);
+      } catch (err) {
+        console.error('❌ Balance fetch error:', err.message);
+      }
+
+      // ✅ Fetch transactions (requires API key - may fail if no API key)
+      try {
+        transactionsData = await paymentService.getTransactions();
+        console.log('✅ Transactions fetched:', transactionsData);
+      } catch (err) {
+        console.error('❌ Transactions fetch error:', err.message);
+        // Set empty data if API key not found
+        transactionsData = {
+          transactions: [],
+          summary: {
+            total_transactions: 0,
+            successful_transactions: 0
+          }
+        };
+      }
+      
+      // ✅ Fetch payouts (requires JWT token only)
+      try {
+        payoutsData = await paymentService.getPayouts();
+        console.log('✅ Payouts fetched:', payoutsData);
+      } catch (err) {
+        console.error('❌ Payouts fetch error:', err.message);
+        payoutsData = {
+          payouts: [],
+          summary: {
+            total_payout_requests: 0
+          }
+        };
+      }
+
+      setDashboardStats({
+        balance: balanceData,
+        transactions: transactionsData,
+        payouts: payoutsData,
+        loading: false
+      });
+    } catch (error) {
+      console.error('❌ Dashboard stats error:', error);
+      setDashboardStats(prev => ({ ...prev, loading: false }));
+    }
+  };
 
   const checkExistingApiKey = async () => {
     setFetching(true);
@@ -33,7 +99,6 @@ const AdminDashboard = () => {
       const result = await apiKeyService.getApiKey();
       console.log('API key result:', result);
       
-      // Handle different possible response structures
       const apiKeyValue = result?.apiKey || result?.key || result?.data?.apiKey || result?.data?.key || result;
       
       if (apiKeyValue && typeof apiKeyValue === 'string' && apiKeyValue.length > 0) {
@@ -41,14 +106,12 @@ const AdminDashboard = () => {
         setHasApiKey(true);
         setSuccess('Existing API key loaded successfully!');
       } else {
-        setError('No API key found in response. You may need to create one first.');
+        setError('No API key found. You may need to create one first.');
         setHasApiKey(false);
       }
     } catch (error) {
-      // Handle different error cases
       if (error.message.includes('Unauthorized')) {
         setError('Session expired. Please log in again.');
-        // Optionally redirect to login
         setTimeout(() => {
           authService.logout();
           navigate('/login');
@@ -72,19 +135,18 @@ const AdminDashboard = () => {
 
     try {
       const result = await apiKeyService.createApiKey();
-      console.log('Create API key result:', result);
-      
-      // Handle different possible response structures
       const apiKeyValue = result?.apiKey || result?.key || result?.data?.apiKey || result?.data?.key || result;
       
       if (apiKeyValue && typeof apiKeyValue === 'string' && apiKeyValue.length > 0) {
         setApiKey(apiKeyValue);
         setHasApiKey(true);
-        setSuccess('API key created successfully! You can only create one API key.');
+        setSuccess('API key created successfully!');
+        // ✅ Refresh dashboard stats after creating API key
+        fetchDashboardStats();
       } else {
         setApiKey('API Key created successfully');
         setHasApiKey(true);
-        setSuccess('API key created successfully! You can only create one API key.');
+        setSuccess('API key created successfully!');
       }
     } catch (error) {
       if (error.message.includes('already exists') || error.message.includes('already created')) {
@@ -96,8 +158,6 @@ const AdminDashboard = () => {
           authService.logout();
           navigate('/login');
         }, 2000);
-      } else if (error.message.includes('Forbidden')) {
-        setError('You do not have permission to create API keys.');
       } else {
         setError(error.message);
       }
@@ -110,45 +170,129 @@ const AdminDashboard = () => {
     if (apiKey) {
       navigator.clipboard.writeText(apiKey);
       setSuccess('API key copied to clipboard!');
+      setTimeout(() => setSuccess(''), 3000);
     }
   };
+
+  const formatCurrency = (amount) => {
+    return `₹${parseFloat(amount || 0).toLocaleString('en-IN', { 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2 
+    })}`;
+  };
+
+  const getTodayTransactions = () => {
+    if (!dashboardStats.transactions?.transactions) return { count: 0, amount: 0 };
+    
+    const today = new Date().toDateString();
+    const todayTxns = dashboardStats.transactions.transactions.filter(txn => 
+      new Date(txn.created_at).toDateString() === today && txn.status === 'paid'
+    );
+    
+    return {
+      count: todayTxns.length,
+      amount: todayTxns.reduce((sum, txn) => sum + (txn.amount || 0), 0)
+    };
+  };
+
+  const getTodayPayouts = () => {
+    if (!dashboardStats.payouts?.payouts) return { count: 0, amount: 0 };
+    
+    const today = new Date().toDateString();
+    const todayPayouts = dashboardStats.payouts.payouts.filter(payout => 
+      new Date(payout.requestedAt).toDateString() === today
+    );
+    
+    return {
+      count: todayPayouts.length,
+      amount: todayPayouts.reduce((sum, payout) => sum + (payout.netAmount || 0), 0)
+    };
+  };
+
+  const todayPayin = getTodayTransactions();
+  const todayPayout = getTodayPayouts();
+  const totalTransactions = dashboardStats.transactions?.summary?.total_transactions || 0;
+  const availableBalance = dashboardStats.balance?.availableBalance || 0;
 
   return (
     <div className="page-container with-sidebar">
       <Sidebar />
       <main className="page-main">
         <div className="page-header">
-          <div>
-            <h1>🏠 Admin Dashboard</h1>
-            <p>Welcome to your admin dashboard. Manage API keys and access all payment features.</p>
+          <div className="header-title-section">
+            <div>
+              <h1>🏠 Admin Dashboard</h1>
+              <p>Welcome to your admin dashboard. Manage API keys and access all payment features.</p>
+            </div>
+            <button 
+              onClick={fetchDashboardStats} 
+              disabled={dashboardStats.loading}
+              className="refresh-btn"
+            >
+              <FiRefreshCw className={dashboardStats.loading ? 'spinning' : ''} />
+              {dashboardStats.loading ? 'Loading...' : 'Refresh Stats'}
+            </button>
           </div>
+          
+          {/* Overview Widgets */}
           <div className="overview-widgets">
             <div className="overview-card primary">
-              <div className="metric-label">Today's Payin</div>
-              <div className="metric-value">₹0.00</div>
-              <div className="metric-sub">0 Transactions</div>
+              <div className="card-icon">
+                <FiDollarSign />
+              </div>
+              <div className="card-content">
+                <div className="metric-label">Today's Payin</div>
+                <div className="metric-value">
+                  {dashboardStats.loading ? '...' : formatCurrency(todayPayin.amount)}
+                </div>
+                <div className="metric-sub">{todayPayin.count} Transactions</div>
+              </div>
             </div>
-            <div className="overview-card">
-              <div className="metric-label">Today's Payout</div>
-              <div className="metric-value">₹0.00</div>
-              <div className="metric-sub">0 Transactions</div>
+            
+            <div className="overview-card secondary">
+              <div className="card-icon">
+                <TbArrowsTransferDown />
+              </div>
+              <div className="card-content">
+                <div className="metric-label">Today's Payout</div>
+                <div className="metric-value">
+                  {dashboardStats.loading ? '...' : formatCurrency(todayPayout.amount)}
+                </div>
+                <div className="metric-sub">{todayPayout.count} Requests</div>
+              </div>
             </div>
-            <div className="overview-card">
-              <div className="metric-label">Total Transactions</div>
-              <div className="metric-value">0</div>
-              <div className="metric-sub">0% Daily Growth Rate</div>
+            
+            <div className="overview-card tertiary">
+              <div className="card-icon">
+                <HiOutlineChartBar />
+              </div>
+              <div className="card-content">
+                <div className="metric-label">Total Transactions</div>
+                <div className="metric-value">
+                  {dashboardStats.loading ? '...' : totalTransactions}
+                </div>
+                <div className="metric-sub">
+                  {dashboardStats.transactions?.summary?.successful_transactions || 0} Successful
+                </div>
+              </div>
             </div>
-            <div className="overview-card">
-              <div className="metric-label">Debit Balance</div>
-              <div className="metric-value">₹0</div>
-              <div className="metric-sub">Wallet</div>
+            
+            <div className="overview-card quaternary">
+              <div className="card-icon">
+                <RiMoneyDollarCircleLine />
+              </div>
+              <div className="card-content">
+                <div className="metric-label">Available Balance</div>
+                <div className="metric-value">
+                  {dashboardStats.loading ? '...' : formatCurrency(availableBalance)}
+                </div>
+                <div className="metric-sub">Ready to withdraw</div>
+              </div>
             </div>
           </div>
         </div>
         
         <div className="page-content">
-          
-
           {/* API Key Management Section */}
           <div className="api-key-section">
             <h2>API Key Management</h2>
@@ -229,24 +373,36 @@ const AdminDashboard = () => {
                 <div className="access-icon"><HiOutlineChartBar /></div>
                 <h3>Transactions</h3>
                 <p>View and manage all payment transactions</p>
+                <div className="access-badge">
+                  {totalTransactions} Total
+                </div>
               </div>
               
               <div className="access-card" onClick={() => navigate('/admin/payouts')}>
                 <div className="access-icon"><TbArrowsTransferDown /></div>
                 <h3>Payouts</h3>
                 <p>Manage payout requests and history</p>
+                <div className="access-badge">
+                  {dashboardStats.payouts?.summary?.total_payout_requests || 0} Total
+                </div>
               </div>
               
               <div className="access-card" onClick={() => navigate('/admin/payins')}>
                 <div className="access-icon"><RiMoneyDollarCircleLine /></div>
-                <h3>Payins</h3>
+                <h3>Balance</h3>
                 <p>View account balance and financial overview</p>
+                <div className="access-badge">
+                  {formatCurrency(availableBalance)}
+                </div>
               </div>
               
               <div className="access-card" onClick={() => navigate('/admin/payments')}>
                 <div className="access-icon"><MdPayments /></div>
                 <h3>Payments</h3>
                 <p>Create and manage payment links</p>
+                <div className="access-badge">
+                  Create Link
+                </div>
               </div>
             </div>
           </div>
