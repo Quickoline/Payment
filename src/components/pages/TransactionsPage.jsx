@@ -6,29 +6,118 @@ import './PageLayout.css';
 
 const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
-  const [activeTab, setActiveTab] = useState('payin'); // 'payin' | 'payout'
-  const [query, setQuery] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [status, setStatus] = useState('all');
+  const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('payin'); // 'payin' | 'payout'
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    page: 1,
+    limit: 20,
+    status: '',
+    payment_gateway: '',
+    payment_method: '',
+    start_date: '',
+    end_date: '',
+    search: '',
+    sort_by: 'createdAt',
+    sort_order: 'desc'
+  });
 
   useEffect(() => {
     fetchTransactions();
-  }, []);
+  }, [filters.page, filters.limit, filters.status, filters.payment_gateway, filters.payment_method, filters.start_date, filters.end_date, filters.search, filters.sort_by, filters.sort_order, activeTab]);
 
   const fetchTransactions = async () => {
     setLoading(true);
     setError('');
     
     try {
-      const data = await paymentService.getTransactions();
-      setTransactions(data.transactions || data || []);
+      // Determine status filter based on active tab
+      let statusFilter = '';
+      if (activeTab === 'payin') {
+        statusFilter = 'paid'; // Only show paid transactions for payin
+      } else if (activeTab === 'payout') {
+        statusFilter = 'pending,refunded,failed,partial_refund'; // Show payout statuses
+      }
+
+      const updatedFilters = {
+        ...filters,
+        status: statusFilter
+      };
+
+      const data = await paymentService.getTransactions(updatedFilters);
+      setTransactions(data.transactions || []);
+      setPagination(data.pagination || {});
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value,
+      page: 1 // Reset to first page when filters change
+    }));
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setFilters(prev => ({
+      ...prev,
+      page: 1 // Reset to first page when changing tabs
+    }));
+  };
+
+  const handlePageChange = (newPage) => {
+    setFilters(prev => ({
+      ...prev,
+      page: newPage
+    }));
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('en-IN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
+  const formatAmount = (amount) => {
+    if (!amount) return '₹0.00';
+    return `₹${parseFloat(amount).toFixed(2)}`;
+  };
+
+  const getStatusClass = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'paid':
+      case 'success':
+        return 'status-success';
+      case 'pending':
+        return 'status-pending';
+      case 'failed':
+        return 'status-failed';
+      case 'cancelled':
+        return 'status-cancelled';
+      case 'refunded':
+        return 'status-refunded';
+      case 'partial_refund':
+        return 'status-partial-refund';
+      case 'created':
+        return 'status-created';
+      case 'expired':
+        return 'status-expired';
+      default:
+        return 'status-pending';
     }
   };
 
@@ -47,23 +136,92 @@ const TransactionsPage = () => {
         <div className="page-content">
           {/* Tabs */}
           <div className="tabs">
-            <button className={`tab ${activeTab === 'payin' ? 'active' : ''}`} onClick={() => setActiveTab('payin')}>Payin</button>
-            <button className={`tab ${activeTab === 'payout' ? 'active' : ''}`} onClick={() => setActiveTab('payout')}>Payout</button>
+            <button 
+              className={`tab ${activeTab === 'payin' ? 'active' : ''}`} 
+              onClick={() => handleTabChange('payin')}
+            >
+              Payin
+            </button>
+            <button 
+              className={`tab ${activeTab === 'payout' ? 'active' : ''}`} 
+              onClick={() => handleTabChange('payout')}
+            >
+              Payout
+            </button>
           </div>
 
           {/* Filter bar */}
           <div className="filter-bar">
-            <input className="filter-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search..." />
-            <input className="filter-date" type="datetime-local" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
-            <input className="filter-date" type="datetime-local" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
-            <select className="filter-select" value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="all">All</option>
-              <option value="success">Success</option>
+            <input 
+              className="filter-input" 
+              value={filters.search} 
+              onChange={(e) => handleFilterChange('search', e.target.value)} 
+              placeholder="Search transactions..." 
+            />
+            <input 
+              className="filter-date" 
+              type="date" 
+              value={filters.start_date} 
+              onChange={(e) => handleFilterChange('start_date', e.target.value)} 
+              placeholder="Start Date"
+            />
+            <input 
+              className="filter-date" 
+              type="date" 
+              value={filters.end_date} 
+              onChange={(e) => handleFilterChange('end_date', e.target.value)} 
+              placeholder="End Date"
+            />
+            <select 
+              className="filter-select" 
+              value={filters.status} 
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+            >
+              <option value="">All Status</option>
+              <option value="created">Created</option>
               <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
               <option value="failed">Failed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="refunded">Refunded</option>
+              <option value="partial_refund">Partial Refund</option>
             </select>
-            <button className="secondary-btn" onClick={fetchTransactions} disabled={loading}>{loading ? 'Loading...' : 'Export'}</button>
+            <select 
+              className="filter-select" 
+              value={filters.payment_method} 
+              onChange={(e) => handleFilterChange('payment_method', e.target.value)}
+            >
+              <option value="">All Methods</option>
+              <option value="upi">UPI</option>
+              <option value="card">Card</option>
+              <option value="netbanking">Net Banking</option>
+              <option value="wallet">Wallet</option>
+            </select>
+            <select 
+              className="filter-select" 
+              value={filters.sort_by} 
+              onChange={(e) => handleFilterChange('sort_by', e.target.value)}
+            >
+              <option value="createdAt">Sort by Date</option>
+              <option value="amount">Sort by Amount</option>
+            </select>
+            <select 
+              className="filter-select" 
+              value={filters.sort_order} 
+              onChange={(e) => handleFilterChange('sort_order', e.target.value)}
+            >
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+            <button 
+              className="secondary-btn" 
+              onClick={fetchTransactions} 
+              disabled={loading}
+            >
+              {loading ? 'Loading...' : 'Apply Filters'}
+            </button>
           </div>
+
           {error && <div className="error-message">{error}</div>}
           
           {loading ? (
@@ -78,33 +236,39 @@ const TransactionsPage = () => {
                   <table className="tx-table">
                     <thead>
                       <tr>
-                        <th>Transaction Time</th>
-                        <th>ID</th>
-                        <th>Transaction Ref ID</th>
-                        <th>Status</th>
-                        <th>Status Description</th>
-                        <th>RRN</th>
-                        <th>Name</th>
-                        <th>Payer Name</th>
-                        <th>Payer ID</th>
+                        <th>Transaction ID</th>
+                        <th>Order ID</th>
+                        <th>Customer</th>
                         <th>Amount</th>
-                        <th>Charge</th>
+                        <th>Status</th>
+                        <th>Payment Method</th>
+                        <th>Gateway</th>
+                        <th>Updated At</th>
+                        <th>Paid At</th>
+                        <th>Description</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {transactions.map((t, i) => (
-                        <tr key={i}>
-                          <td>{t.createdAt || new Date().toLocaleString()}</td>
-                          <td>{t.id || t.orderId || `TXN-${i + 1}`}</td>
-                          <td>{t.referenceId || '-'}</td>
-                          <td><span className={`transaction-status status-${(t.status || 'pending').toLowerCase()}`}>{t.status || 'Pending'}</span></td>
-                          <td>{t.statusDescription || '-'}</td>
-                          <td>{t.rrn || '-'}</td>
-                          <td>{t.customerName || '-'}</td>
-                          <td>{t.payerName || '-'}</td>
-                          <td>{t.payerId || '-'}</td>
-                          <td>₹{t.amount || '0.00'}</td>
-                          <td>{t.charge || '-'}</td>
+                      {transactions.map((transaction, index) => (
+                        <tr key={transaction.transaction_id || index}>
+                          <td className="transaction-id">{transaction.transaction_id || '-'}</td>
+                          <td className="order-id">{transaction.order_id || '-'}</td>
+                          <td className="customer-info">
+                            <div className="customer-name">{transaction.customer_name || '-'}</div>
+                            <div className="customer-email">{transaction.customer_email || '-'}</div>
+                            <div className="customer-phone">{transaction.customer_phone || '-'}</div>
+                          </td>
+                          <td className="amount">{formatAmount(transaction.amount)}</td>
+                          <td>
+                            <span className={`transaction-status ${getStatusClass(transaction.status)}`}>
+                              {transaction.status || 'Pending'}
+                            </span>
+                          </td>
+                          <td className="payment-method">{transaction.payment_method || '-'}</td>
+                          <td className="gateway">{transaction.payment_gateway || '-'}</td>
+                          <td className="date">{formatDate(transaction.updated_at || transaction.created_at)}</td>
+                          <td className="date">{formatDate(transaction.paid_at)}</td>
+                          <td className="description">{transaction.description || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -114,7 +278,35 @@ const TransactionsPage = () => {
                 <div className="empty-state">
                   <div className="empty-icon"><HiOutlineClipboardDocumentList /></div>
                   <h3>No Transactions Found</h3>
-                  <p>No transactions have been recorded yet.</p>
+                  <p>No transactions match your current filters.</p>
+                </div>
+              )}
+
+              {/* Pagination */}
+              {pagination && Object.keys(pagination).length > 0 && (
+                <div className="pagination">
+                  <div className="pagination-info">
+                    Showing {((pagination.current_page - 1) * pagination.limit) + 1} to {Math.min(pagination.current_page * pagination.limit, pagination.total_count)} of {pagination.total_count} transactions
+                  </div>
+                  <div className="pagination-controls">
+                    <button 
+                      onClick={() => handlePageChange(pagination.current_page - 1)}
+                      disabled={!pagination.has_prev_page || loading}
+                      className="pagination-btn"
+                    >
+                      Previous
+                    </button>
+                    <span className="pagination-page">
+                      Page {pagination.current_page} of {pagination.total_pages}
+                    </span>
+                    <button 
+                      onClick={() => handlePageChange(pagination.current_page + 1)}
+                      disabled={!pagination.has_next_page || loading}
+                      className="pagination-btn"
+                    >
+                      Next
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

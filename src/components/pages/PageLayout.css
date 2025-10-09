@@ -95,6 +95,125 @@
   gap: 30px;
 }
 
+/* Summary Cards */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.summary-card h4 {
+  margin: 0 0 8px 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.summary-value.success {
+  color: #10b981;
+}
+
+.summary-value.pending {
+  color: #f59e0b;
+}
+
+.summary-value.failed {
+  color: #ef4444;
+}
+
+.summary-value.revenue {
+  color: var(--primary);
+}
+
+/* Customer Info in table */
+.customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customer-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.customer-email {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.customer-phone {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.pagination-info {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-page {
+  font-weight: 500;
+  color: var(--text);
+}
+
 /* Transactions tabs + filters */
 .tabs {
   background: var(--card);
@@ -104,6 +223,7 @@
   display: inline-flex;
   gap: 6px;
   align-self: flex-start;
+  margin-bottom: 20px;
 }
 .tab {
   padding: 10px 24px;
@@ -112,8 +232,12 @@
   border: none;
   color: var(--text);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
-.tab.active { background: var(--primary); color: #fff; }
+.tab.active { 
+  background: var(--primary); 
+  color: #fff; 
+}
 
 .filter-bar {
   display: flex;
@@ -270,6 +394,31 @@
 .status-failed, .status-error {
   background: #f8d7da;
   color: #721c24;
+}
+
+.status-cancelled {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.status-refunded {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-partial-refund {
+  background: #e9d5ff;
+  color: #7c3aed;
+}
+
+.status-created {
+  background: #eef6ff;
+  color: var(--primary);
+}
+
+.status-expired {
+  background: #f1f5f9;
+  color: #64748b;
 }
 
 .transaction-body, .payout-body {

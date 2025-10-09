@@ -28,7 +28,7 @@ class PaymentService {
   }
 
   // Transactions Section - requires API key authorization
-  async getTransactions() {
+  async getTransactions(filters = {}) {
     try {
       const apiKeyData = await this.getApiKey();
       const apiKey = apiKeyData.apiKey || apiKeyData.key;
@@ -37,7 +37,22 @@ class PaymentService {
         throw new Error('API key not found');
       }
 
-      const response = await axios.get(API_ENDPOINTS.TRANSACTIONS, {
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (filters.page) params.append('page', filters.page);
+      if (filters.limit) params.append('limit', filters.limit);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.payment_gateway) params.append('payment_gateway', filters.payment_gateway);
+      if (filters.payment_method) params.append('payment_method', filters.payment_method);
+      if (filters.start_date) params.append('start_date', filters.start_date);
+      if (filters.end_date) params.append('end_date', filters.end_date);
+      if (filters.search) params.append('search', filters.search);
+      if (filters.sort_by) params.append('sort_by', filters.sort_by);
+      if (filters.sort_order) params.append('sort_order', filters.sort_order);
+
+      const url = `${API_ENDPOINTS.TRANSACTIONS}${params.toString() ? `?${params.toString()}` : ''}`;
+
+      const response = await axios.get(url, {
         headers: {
           'x-api-key': `${apiKey}`,
           'Content-Type': 'application/json',
