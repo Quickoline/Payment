@@ -9,6 +9,30 @@
   max-width: 1200px;
   margin: 0 auto;
 }
+/* Payout Page Specific Styles */
+.balance-card.quaternary {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.status-icon {
+  margin-right: 4px;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+.status-requested {
+  background: #e3f2fd;
+  color: #2196f3;
+}
+
+/* Better payout status styling */
+.payout-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
 .page-header {
   background: var(--card);
