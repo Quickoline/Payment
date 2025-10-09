@@ -308,7 +308,7 @@ const BalancePage = () => {
             <FiInfo />
             <span>
               <strong>Next Settlement:</strong>{' '}
-              {balance.raw.settlement_info.next_settlement_time || 'Tomorrow at 3:00 PM (T+1)'}
+              {balance.raw.settlement_info.next_settlement_time || 'Tomorrow at 3:00 PM (T+1) | (T+2 ) '}
             </span>
           </div>
         </div>
@@ -324,7 +324,7 @@ const BalancePage = () => {
         <div className="commission-card">
           <div className="commission-title">Payin Commission</div>
           <div className="commission-rate">
-            {balance.raw.balance.commission_structure.payin}
+            3.8% 
           </div>
           <div className="commission-description">
             Applied on all incoming payments
@@ -334,7 +334,7 @@ const BalancePage = () => {
         <div className="commission-card">
           <div className="commission-title">Payout (₹500-₹1000)</div>
           <div className="commission-rate">
-            {balance.raw.balance.commission_structure.payout_500_to_1000}
+           ₹30
           </div>
           <div className="commission-description">
             Flat fee for small payouts
@@ -344,7 +344,7 @@ const BalancePage = () => {
         <div className="commission-card">
           <div className="commission-title">Payout (Above ₹1000)</div>
           <div className="commission-rate">
-            {balance.raw.balance.commission_structure.payout_above_1000}
+            1.50%
           </div>
           <div className="commission-description">
             Percentage-based fee
@@ -438,7 +438,7 @@ const BalancePage = () => {
         </div>
         {!balance.payoutEligibility.can_request_payout && (
           <div className="eligibility-note">
-            <FiInfo /> You need at least ₹500 in <strong>settled balance</strong> to request a payout. Unsettled funds will be available after tomorrow's 3 PM settlement.
+            <FiInfo /> You need at least ₹500 in <strong>settled balance</strong> to request a payout. Unsettled funds will be available after T+1 or T+2 3 PM settlement.
           </div>
         )}
       </div>

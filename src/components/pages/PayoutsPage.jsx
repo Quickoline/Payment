@@ -361,7 +361,7 @@ const PayoutsPage = () => {
 
           {/* Commission Info */}
           <div className="info-message">
-            <FiInfo /> <strong>Payout Charges:</strong> ₹500-₹1000: Flat ₹35.40 | Above ₹1000: 1.77% (includes 18% GST)
+            <FiInfo /> <strong>Payout Charges:</strong> ₹500-₹1000: Flat ₹35.40 | Above ₹1000: 1.77% 
           </div>
 
           {/* Eligibility Notice */}
@@ -369,7 +369,7 @@ const PayoutsPage = () => {
             <div className="warning-message">
               <FiAlertCircle /> <strong>Cannot Request Payout:</strong> You need at least ₹500 in settled balance to request a payout. 
               {balance?.raw?.settlement_info?.unsettled_transactions > 0 && (
-                <span> Your unsettled funds will be available after tomorrow's 3 PM settlement.</span>
+                <span> Your unsettled funds will be available T+1 or T+2 3 PM settlement.</span>
               )}
             </div>
           )}
