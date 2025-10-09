@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
+  
   FiRefreshCw, 
   FiPlus, 
   FiX,
@@ -7,7 +8,8 @@ import {
   FiClock,
   FiAlertCircle,
   FiInfo,
-  FiPercent
+  FiPercent,
+  FiDollarSign
 } from 'react-icons/fi';
 import paymentService from '../../services/paymentService';
 import Sidebar from '../Sidebar';
@@ -17,6 +19,7 @@ import Toast from '../ui/Toast';
 const PayoutsPage = () => {
   const [payouts, setPayouts] = useState([]);
   const [payoutsSummary, setPayoutsSummary] = useState(null);
+  const [balance, setBalance] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showRequestForm, setShowRequestForm] = useState(false);
@@ -49,6 +52,7 @@ const PayoutsPage = () => {
   const loadEligibility = async () => {
     try {
       const bal = await paymentService.getBalance();
+      setBalance(bal);
       const pe = bal.payoutEligibility || bal.payout_eligibility || {};
       setEligibility({
         can_request_payout: pe.can_request_payout ?? true,
@@ -84,7 +88,6 @@ const PayoutsPage = () => {
     try {
       const amt = parseFloat(requestData.amount);
       
-      // Validation
       if (!eligibility.can_request_payout) {
         throw new Error('You are not eligible to request a payout at this time.');
       }
@@ -115,6 +118,7 @@ const PayoutsPage = () => {
       setToast({ message: 'Payout request submitted successfully!', type: 'success' });
       resetForm();
       fetchPayouts();
+      loadEligibility();
     } catch (error) {
       setError(error.message);
       setToast({ message: error.message, type: 'error' });
@@ -202,7 +206,10 @@ const PayoutsPage = () => {
           </div>
           <div className="header-actions">
             <button 
-              onClick={fetchPayouts} 
+              onClick={() => {
+                fetchPayouts();
+                loadEligibility();
+              }} 
               disabled={loading} 
               className="refresh-btn"
             >
@@ -226,57 +233,146 @@ const PayoutsPage = () => {
             </div>
           )}
 
-          {/* Summary Cards */}
-          {payoutsSummary && (
+          {/* Balance Summary Cards */}
+          {balance && (
             <div className="balance-cards">
+              {/* Settled Balance - Available for Payout */}
               <div className="balance-card primary">
-                <div className="balance-icon"></div>
-                <div className="balance-content">
-                  <div className="balance-label">Total Payouts</div>
-                  <div className="balance-amount">{payoutsSummary.total_payout_requests || 0}</div>
-                  <div className="balance-description">All time requests</div>
+                <div className="balance-icon">
+                  <FiDollarSign />
                 </div>
-              </div>
-              
-              <div className="balance-card secondary">
-                <div className="balance-icon"><FiCheck /></div>
                 <div className="balance-content">
-                  <div className="balance-label">Completed</div>
-                  <div className="balance-amount">{payoutsSummary.completed_payouts || 0}</div>
-                  <div className="balance-description">
-                    {formatCurrency(payoutsSummary.total_completed)}
-                  </div>
-                </div>
-              </div>
-
-              <div className="balance-card tertiary">
-                <div className="balance-icon"><FiClock /></div>
-                <div className="balance-content">
-                  <div className="balance-label">Pending</div>
-                  <div className="balance-amount">{payoutsSummary.pending_payouts || 0}</div>
-                  <div className="balance-description">
-                    {formatCurrency(payoutsSummary.total_pending)}
-                  </div>
-                </div>
-              </div>
-
-              <div className="balance-card quaternary">
-                <div className="balance-icon"><FiPercent /></div>
-                <div className="balance-content">
-                  <div className="balance-label">Commission Paid</div>
+                  <div className="balance-label">Available Balance (Settled)</div>
                   <div className="balance-amount">
-                    {formatCurrency(payoutsSummary.total_commission_paid)}
+                    {formatCurrency(balance.raw?.balance?.available_balance || balance.availableBalance)}
                   </div>
-                  <div className="balance-description">Total charges</div>
+                  <div className="balance-description">
+                    ✓ Ready to withdraw
+                  </div>
+                </div>
+              </div>
+
+              {/* Unsettled Balance - Locked */}
+              <div className="balance-card warning">
+                <div className="balance-icon">
+                  <FiClock />
+                </div>
+                <div className="balance-content">
+                  <div className="balance-label">Unsettled Balance</div>
+                  <div className="balance-amount">
+                    {formatCurrency(balance.raw?.balance?.unsettled_net_revenue || 0)}
+                  </div>
+                  <div className="balance-description">
+                    ⏳ Settles tomorrow 3 PM
+                  </div>
+                </div>
+              </div>
+
+              {/* Pending Payouts */}
+              <div className="balance-card tertiary">
+                <div className="balance-icon">
+                  <FiClock />
+                </div>
+                <div className="balance-content">
+                  <div className="balance-label">Pending Payouts</div>
+                  <div className="balance-amount">
+                    {formatCurrency(balance.pendingBalance)}
+                  </div>
+                  <div className="balance-description">
+                    Awaiting processing
+                  </div>
+                </div>
+              </div>
+
+              {/* Commission Deducted */}
+              <div className="balance-card quaternary">
+                <div className="balance-icon">
+                  <FiPercent />
+                </div>
+                <div className="balance-content">
+                  <div className="balance-label">Total Commission</div>
+                  <div className="balance-amount">
+                    {formatCurrency(balance.commissionDeducted)}
+                  </div>
+                  <div className="balance-description">
+                    Gateway charges
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Settlement Warning Banner */}
+          {balance?.raw?.settlement_info?.unsettled_transactions > 0 && (
+            <div className="settlement-warning-banner">
+              <div className="banner-icon">
+                <FiInfo />
+              </div>
+              <div className="banner-content">
+                <strong>Settlement Notice:</strong>{' '}
+                You have {formatCurrency(balance.raw.balance.unsettled_net_revenue)} in unsettled funds{' '}
+                from {balance.raw.settlement_info.unsettled_transactions} transaction(s).{' '}
+                These funds will be available for payout after tomorrow's 3 PM settlement.
+              </div>
+            </div>
+          )}
+
+          {/* Payout Summary Cards */}
+          {payoutsSummary && (
+            <div className="payout-summary-section">
+              <h3><FiPercent /> Payout Statistics</h3>
+              <div className="summary-cards-grid">
+                <div className="summary-stat-card">
+                  <div className="stat-icon"></div>
+                  <div className="stat-content">
+                    <div className="stat-value">{payoutsSummary.total_payout_requests || 0}</div>
+                    <div className="stat-label">Total Requests</div>
+                  </div>
+                </div>
+
+                <div className="summary-stat-card success">
+                  <div className="stat-icon"><FiCheck /></div>
+                  <div className="stat-content">
+                    <div className="stat-value">{payoutsSummary.completed_payouts || 0}</div>
+                    <div className="stat-label">Completed</div>
+                    <div className="stat-amount">{formatCurrency(payoutsSummary.total_completed)}</div>
+                  </div>
+                </div>
+
+                <div className="summary-stat-card warning">
+                  <div className="stat-icon"><FiClock /></div>
+                  <div className="stat-content">
+                    <div className="stat-value">{payoutsSummary.pending_payouts || 0}</div>
+                    <div className="stat-label">Pending</div>
+                    <div className="stat-amount">{formatCurrency(payoutsSummary.total_pending)}</div>
+                  </div>
+                </div>
+
+                <div className="summary-stat-card info">
+                  <div className="stat-icon"><FiPercent /></div>
+                  <div className="stat-content">
+                    <div className="stat-value">{formatCurrency(payoutsSummary.total_commission_paid)}</div>
+                    <div className="stat-label">Commission Paid</div>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
           {/* Commission Info */}
-          <div className="success-message">
+          <div className="info-message">
             <FiInfo /> <strong>Payout Charges:</strong> ₹500-₹1000: Flat ₹35.40 | Above ₹1000: 1.77% (includes 18% GST)
           </div>
+
+          {/* Eligibility Notice */}
+          {!eligibility.can_request_payout && (
+            <div className="warning-message">
+              <FiAlertCircle /> <strong>Cannot Request Payout:</strong> You need at least ₹500 in settled balance to request a payout. 
+              {balance?.raw?.settlement_info?.unsettled_transactions > 0 && (
+                <span> Your unsettled funds will be available after tomorrow's 3 PM settlement.</span>
+              )}
+            </div>
+          )}
           
           {/* Request Form */}
           {showRequestForm && (
@@ -440,56 +536,59 @@ const PayoutsPage = () => {
           ) : (
             <div className="payouts-container">
               {payouts.length > 0 ? (
-                <div className="payouts-grid">
-                  {payouts.map((payout, index) => (
-                    <div key={payout.payoutId || index} className="payout-card">
-                      <div className="payout-header">
-                        <div className="payout-id">
-                          {payout.payoutId || `PAYOUT-${index + 1}`}
-                        </div>
-                        <div className={`payout-status status-${(payout.status || 'pending').toLowerCase()}`}>
-                          {getStatusIcon(payout.status)}
-                          {payout.status || 'Pending'}
-                        </div>
-                      </div>
-                      
-                      <div className="payout-body">
-                        <div className="payout-amount">
-                          {formatCurrency(payout.amount)}
+                <>
+                  <h3><FiClock /> Payout History</h3>
+                  <div className="payouts-grid">
+                    {payouts.map((payout, index) => (
+                      <div key={payout.payoutId || index} className="payout-card">
+                        <div className="payout-header">
+                          <div className="payout-id">
+                            {payout.payoutId || `PAYOUT-${index + 1}`}
+                          </div>
+                          <div className={`payout-status status-${(payout.status || 'pending').toLowerCase()}`}>
+                            {getStatusIcon(payout.status)}
+                            {payout.status || 'Pending'}
+                          </div>
                         </div>
                         
-                        <div className="payout-details">
-                          <div className="detail-row">
-                            <span className="detail-label">Net Amount:</span>
-                            <span className="detail-value" style={{ color: '#10b981', fontWeight: 600 }}>
-                              {formatCurrency(payout.netAmount)}
-                            </span>
+                        <div className="payout-body">
+                          <div className="payout-amount">
+                            {formatCurrency(payout.amount)}
                           </div>
-                          <div className="detail-row">
-                            <span className="detail-label">Commission:</span>
-                            <span className="detail-value">{formatCurrency(payout.commission)}</span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">Mode:</span>
-                            <span className="detail-value">
-                              {payout.transferMode === 'bank_transfer' ? 'Bank Transfer' : 'UPI'}
-                            </span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">Requested:</span>
-                            <span className="detail-value">{formatDate(payout.requestedAt)}</span>
-                          </div>
-                          {payout.adminNotes && (
+                          
+                          <div className="payout-details">
                             <div className="detail-row">
-                              <span className="detail-label">Notes:</span>
-                              <span className="detail-value">{payout.adminNotes}</span>
+                              <span className="detail-label">Net Amount:</span>
+                              <span className="detail-value" style={{ color: '#10b981', fontWeight: 600 }}>
+                                {formatCurrency(payout.netAmount)}
+                              </span>
                             </div>
-                          )}
+                            <div className="detail-row">
+                              <span className="detail-label">Commission:</span>
+                              <span className="detail-value">{formatCurrency(payout.commission)}</span>
+                            </div>
+                            <div className="detail-row">
+                              <span className="detail-label">Mode:</span>
+                              <span className="detail-value">
+                                {payout.transferMode === 'bank_transfer' ? 'Bank Transfer' : 'UPI'}
+                              </span>
+                            </div>
+                            <div className="detail-row">
+                              <span className="detail-label">Requested:</span>
+                              <span className="detail-value">{formatDate(payout.requestedAt)}</span>
+                            </div>
+                            {payout.adminNotes && (
+                              <div className="detail-row">
+                                <span className="detail-label">Notes:</span>
+                                <span className="detail-value">{payout.adminNotes}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </>
               ) : (
                 <div className="empty-state">
                   <div className="empty-icon"></div>
