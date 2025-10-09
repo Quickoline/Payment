@@ -5,6 +5,162 @@
   flex-direction: column;
   gap: 30px;
 }
+/* Warning Balance Card */
+.balance-card.warning {
+  border-left-color: #ff9800;
+}
+
+.balance-card.warning .card-icon {
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 193, 7, 0.1) 100%);
+  color: #ff9800;
+}
+
+/* Settlement Info Banner */
+.settlement-info-banner {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-left: 4px solid #ff9800;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.banner-icon {
+  font-size: 24px;
+  color: #ff9800;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.banner-content {
+  flex: 1;
+  font-size: 14px;
+  color: #e65100;
+  line-height: 1.6;
+}
+
+.banner-content strong {
+  color: #bf360c;
+}
+
+/* Breakdown Subsection */
+.breakdown-subsection {
+  padding: 12px 0;
+}
+
+.subsection-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #667eea;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.breakdown-value.warning {
+  color: #ff9800;
+}
+
+/* Settlement Section */
+.settlement-section {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.settlement-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settlement-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.settlement-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.stat-value.success {
+  color: #10b981;
+}
+
+.stat-value.warning {
+  color: #ff9800;
+}
+
+.settlement-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settlement-details .detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.settlement-details .detail-row svg {
+  color: #667eea;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Eligibility Note */
+.eligibility-note {
+  margin-top: 16px;
+  padding: 12px;
+  background: #fff3e0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #e65100;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.eligibility-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
 
 /* Balance Cards Grid */
 .balance-cards {
