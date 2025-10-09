@@ -30,6 +30,12 @@ const PayinSection = () => {
     return `₹${parseFloat(amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
+  // Derived commission calculations (flat 3.8% on total payins)
+  const totalRevenue = Number(balance?.totalBalance || 0);
+  const totalRefunded = Number(balance?.raw?.balance?.total_refunded || 0);
+  const computedCommissionDeducted = +(totalRevenue * 0.038).toFixed(2);
+  const computedNetRevenue = +(totalRevenue - computedCommissionDeducted - totalRefunded).toFixed(2);
+
   return (
     <div className="payment-section">
       <div className="section-header">
@@ -76,7 +82,7 @@ const PayinSection = () => {
               </div>
               <div className="card-content">
                 <div className="balance-label">Total Revenue</div>
-                <div className="balance-amount">{formatCurrency(balance.totalBalance)}</div>
+                <div className="balance-amount">{formatCurrency(totalRevenue)}</div>
                 <div className="balance-description">
                   Gross payment received
                 </div>
@@ -102,9 +108,9 @@ const PayinSection = () => {
               </div>
               <div className="card-content">
                 <div className="balance-label">Commission Deducted</div>
-                <div className="balance-amount">{formatCurrency(balance.commissionDeducted)}</div>
+                <div className="balance-amount">{formatCurrency(computedCommissionDeducted)}</div>
                 <div className="balance-description">
-                  {balance.commissionRate || 'Gateway charges'}
+                  3.8% commission on total pay-ins
                 </div>
               </div>
             </div>
@@ -117,26 +123,26 @@ const PayinSection = () => {
             <div className="breakdown-grid">
               <div className="breakdown-item">
                 <span className="breakdown-label">Total Revenue:</span>
-                <span className="breakdown-value">{formatCurrency(balance.totalBalance)}</span>
+                <span className="breakdown-value">{formatCurrency(totalRevenue)}</span>
               </div>
               
               <div className="breakdown-item">
                 <span className="breakdown-label">Total Refunded:</span>
                 <span className="breakdown-value negative">
-                  - {formatCurrency(balance.raw?.balance?.total_refunded || 0)}
+                  - {formatCurrency(totalRefunded)}
                 </span>
               </div>
               
               <div className="breakdown-item highlight">
                 <span className="breakdown-label">Commission Deducted:</span>
                 <span className="breakdown-value negative">
-                  - {formatCurrency(balance.commissionDeducted)}
+                  - {formatCurrency(computedCommissionDeducted)}
                 </span>
               </div>
               
               <div className="breakdown-item">
                 <span className="breakdown-label">Net Revenue:</span>
-                <span className="breakdown-value">{formatCurrency(balance.netRevenue)}</span>
+                <span className="breakdown-value">{formatCurrency(computedNetRevenue)}</span>
               </div>
               
               <div className="breakdown-item">
