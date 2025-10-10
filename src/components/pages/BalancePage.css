@@ -13,7 +13,76 @@
 .balance-card.warning .card-icon {
   background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 193, 7, 0.1) 100%);
   color: #ff9800;
+}/* Settlement Policy */
+.settlement-policy {
+  background: #f0f9ff;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
 }
+
+.settlement-policy p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #1e40af;
+}
+
+/* Settlement Examples */
+.settlement-examples {
+  background: #fef3c7;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.settlement-examples h5 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.settlement-examples ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.settlement-examples li {
+  margin: 6px 0;
+  font-size: 13px;
+  color: #78350f;
+}
+
+/* Eligibility Reason */
+.eligibility-reason {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1e40af;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.eligibility-reason svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Detail Card Icon Colors */
+.detail-icon.success {
+  color: #10b981;
+}
+
+.detail-icon.warning {
+  color: #ff9800;
+}
+
+.stat-value.info {
+  color: #3b82f6;
+}
+
 
 /* Settlement Info Banner */
 .settlement-info-banner {
