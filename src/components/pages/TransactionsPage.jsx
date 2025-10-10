@@ -3,6 +3,8 @@ import { HiOutlineClipboardDocumentList } from 'react-icons/hi2';
 import paymentService from '../../services/paymentService';
 import Sidebar from '../Sidebar';
 import './PageLayout.css';
+import ExportCSV from '../ExportCSV';
+import { FiRefreshCw } from 'react-icons/fi';
 
 const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
@@ -120,7 +122,26 @@ const TransactionsPage = () => {
         return 'status-pending';
     }
   };
-
+ // Format data for CSV export
+  const formatForExport = () => {
+    return transactions.map(txn => ({
+      'Transaction ID': txn.transaction_id,
+      'Order ID': txn.order_id,
+      'UTR': txn.utr || 'N/A',
+      'Bank Transaction ID': txn.bank_transaction_id || 'N/A',
+      'Amount': `₹${txn.amount}`,
+      'Status': txn.status,
+      'Payment Method': txn.payment_method || 'N/A',
+      'Customer Name': txn.customer_name,
+      'Customer Email': txn.customer_email,
+      'Customer Phone': txn.customer_phone,
+      'Description': txn.description || 'N/A',
+      'Gateway': txn.payment_gateway,
+      'Settlement Status': txn.settlement_status || 'unsettled',
+      'Created At': txn.created_at,
+      'Paid At': txn.paid_at || 'Not paid'
+    }));
+  };
   return (
     <div className="page-container with-sidebar">
       <Sidebar />
@@ -128,9 +149,19 @@ const TransactionsPage = () => {
         <div className="page-header">
           <h1>Transactions</h1>
           <p>View and manage all payment transactions</p>
-          <button onClick={fetchTransactions} disabled={loading} className="refresh-btn">
-            {loading ? 'Loading...' : 'Refresh'}
-          </button>
+          
+           <div className="header-actions">
+            <button onClick={fetchTransactions} disabled={loading} className="refresh-btn">
+              <FiRefreshCw className={loading ? 'spinning' : ''} />
+              {loading ? 'Loading...' : 'Refresh'}
+            </button>
+            {/* ✅ Export Button */}
+            <ExportCSV 
+              data={formatForExport()} 
+              filename={`transactions_${new Date().toISOString().split('T')[0]}.csv`}
+              className="primary-btn"
+            />
+          </div>
         </div>
         
         <div className="page-content">

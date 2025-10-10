@@ -9,7 +9,7 @@ import BalancePage from './components/pages/BalancePage';
 import PaymentsPage from './components/pages/PaymentsPage';
 import SuperadminSignupPage from './components/pages/SuperadminSignupPage';
 import SuperadminTransactionsPage from './components/pages/SuperadminTransactionsPage';
-import SuperadminPayoutsPage from './components/pages/SuperadminPayoutsPage';
+import SuperadminPayoutsPage from './components/pages/PayoutsManagement';
 import WebhookPage from './components/pages/WebhookPage';
 import AuthWrapper from './components/AuthWrapper';
 import { USER_ROLES } from './constants/api';

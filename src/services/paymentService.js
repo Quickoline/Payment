@@ -17,6 +17,117 @@ class PaymentService {
       fallback
     );
   }
+// ✅ Add these methods at the end of PaymentService class
+
+  // SuperAdmin: Get all payouts
+  async getAllPayouts(filters = {}) {
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const params = new URLSearchParams();
+      if (filters.page) params.append('page', filters.page);
+      if (filters.limit) params.append('limit', filters.limit);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.merchantId) params.append('merchantId', filters.merchantId);
+      if (filters.startDate) params.append('startDate', filters.startDate);
+      if (filters.endDate) params.append('endDate', filters.endDate);
+
+      const url = `${API_ENDPOINTS.ADMIN_PAYOUTS_ALL}${params.toString() ? `?${params.toString()}` : ''}`;
+
+      const response = await axios.get(url, {
+        headers: {
+          'x-auth-token': `${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Get all payouts error:', error);
+      throw new Error(this.getApiErrorMessage(error, 'Failed to fetch all payouts'));
+    }
+  }
+
+  // SuperAdmin: Approve payout
+  async approvePayout(payoutId, notes = '') {
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await axios.post(
+        API_ENDPOINTS.ADMIN_PAYOUT_APPROVE(payoutId),
+        { notes },
+        {
+          headers: {
+            'x-auth-token': `${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('Approve payout error:', error);
+      throw new Error(this.getApiErrorMessage(error, 'Failed to approve payout'));
+    }
+  }
+
+  // SuperAdmin: Reject payout
+  async rejectPayout(payoutId, reason) {
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await axios.post(
+        API_ENDPOINTS.ADMIN_PAYOUT_REJECT(payoutId),
+        { reason },
+        {
+          headers: {
+            'x-auth-token': `${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('Reject payout error:', error);
+      throw new Error(this.getApiErrorMessage(error, 'Failed to reject payout'));
+    }
+  }
+
+  // SuperAdmin: Process payout (mark as completed)
+  async processPayout(payoutId, utr, notes = '') {
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await axios.post(
+        API_ENDPOINTS.ADMIN_PAYOUT_PROCESS(payoutId),
+        { utr, notes },
+        {
+          headers: {
+            'x-auth-token': `${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('Process payout error:', error);
+      throw new Error(this.getApiErrorMessage(error, 'Failed to process payout'));
+    }
+  }
 
   // Get API key for authorization
   async getApiKey() {
@@ -104,23 +215,11 @@ class PaymentService {
     });
 
     const api = response.data || {};
-    const bal = api.balance || {};
+    const bal = api || {};
     
-    const normalized = {
-      availableBalance: bal.available_balance ?? '0.00',
-      pendingBalance: bal.pending_payouts ?? '0.00',
-      totalBalance: bal.total_revenue ?? '0.00',
-      commissionDeducted: bal.commission_deducted ?? '0.00',
-      commissionRate: bal.commission_rate ?? null,
-      netRevenue: bal.net_revenue ?? '0.00',
-      totalPaidOut: bal.total_paid_out ?? '0.00',
-      transactionSummary: api.transaction_summary || {},
-      payoutEligibility: api.payout_eligibility || {},
-      merchant: api.merchant || {},
-      raw: api,
-    };
+  
 
-    return normalized;
+    return bal;
   } catch (error) {
     console.error('Balance fetch error:', error);
     throw new Error(this.getApiErrorMessage(error, 'Failed to fetch balance'));

@@ -1,6 +1,6 @@
 // API Constants
 
-export const BASE_URL = 'https://api.ninex-group.com/api';
+export const BASE_URL = 'http://localhost:5000/api';
 
 export const API_ENDPOINTS = {
   LOGIN: `${BASE_URL}/auth/login`,
@@ -18,10 +18,19 @@ export const API_ENDPOINTS = {
   PAYOUT_REQUEST: `${BASE_URL}/payments/merchant/payout/request`,
   
   // Superadmin Payment Endpoints
-  ADMIN_TRANSACTIONS: `${BASE_URL}/payments/admin/transactions`,
-  ADMIN_PAYOUT: `${BASE_URL}/payments/admin/payout`,
-  ADMIN_PAYOUTS: `${BASE_URL}/payments/admin/payouts`,
+  // Admin endpoints
+  PAYOUTS: `${BASE_URL}/payments/merchant/payouts`,
+  PAYOUT_REQUEST: `${BASE_URL}/payments/merchant/payout/request`,
+  BALANCE: `${BASE_URL}/payments/merchant/balance`,
+  PAYOUT_CANCEL: (payoutId) => `${BASE_URL}/payments/merchant/payout/${payoutId}/cancel`,
   
+  // ✅ SuperAdmin endpoints
+  ADMIN_PAYOUTS_ALL: `${BASE_URL}/payments/admin/payouts/all`,
+  ADMIN_TRANSACTIONS: `${BASE_URL}/payments/admin/transactions`,
+  ADMIN_PAYOUT_APPROVE: (payoutId) => `${BASE_URL}/payments/admin/payout/${payoutId}/approve`,
+  ADMIN_PAYOUT_REJECT: (payoutId) => `${BASE_URL}/payments/admin/payout/${payoutId}/reject`,
+  ADMIN_PAYOUT_PROCESS: (payoutId) => `${BASE_URL}/payments/admin/payout/${payoutId}/process`,
+
   // Webhook Endpoints
   WEBHOOK_CONFIGURE: `${BASE_URL}/payments/merchant/webhook/configure`,
   WEBHOOK_CONFIG: `${BASE_URL}/payments/merchant/webhook/config`,

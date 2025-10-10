@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  
   FiRefreshCw, 
   FiPlus, 
   FiX,
@@ -11,8 +10,10 @@ import {
   FiPercent,
   FiDollarSign
 } from 'react-icons/fi';
+import { RiMoneyDollarCircleLine } from 'react-icons/ri';
 import paymentService from '../../services/paymentService';
 import Sidebar from '../Sidebar';
+import ExportCSV from '../ExportCSV';
 import './PageLayout.css';
 import Toast from '../ui/Toast';
 
@@ -26,9 +27,9 @@ const PayoutsPage = () => {
   const [requestLoading, setRequestLoading] = useState(false);
   const [toast, setToast] = useState({ message: '', type: 'success' });
   const [eligibility, setEligibility] = useState({ 
-    can_request_payout: true, 
-    minimum_payout_amount: 500,
-    maximum_payout_amount: 100000 
+    can_request_payout: false, 
+    minimum_payout_amount: 0,
+    maximum_payout_amount: 0 
   });
   const [requestData, setRequestData] = useState({
     amount: '',
@@ -52,12 +53,13 @@ const PayoutsPage = () => {
   const loadEligibility = async () => {
     try {
       const bal = await paymentService.getBalance();
+      console.log('Balance data:', bal);
       setBalance(bal);
-      const pe = bal.payoutEligibility || bal.payout_eligibility || {};
+      const pe = bal.payout_eligibility || bal.payoutEligibility || {};
       setEligibility({
-        can_request_payout: pe.can_request_payout ?? true,
-        minimum_payout_amount: pe.minimum_payout_amount ?? 500,
-        maximum_payout_amount: pe.maximum_payout_amount ?? 100000,
+        can_request_payout: pe.can_request_payout ?? false,
+        minimum_payout_amount: pe.minimum_payout_amount ?? 0,
+        maximum_payout_amount: pe.maximum_payout_amount ?? 0,
       });
     } catch (e) {
       console.error('Error loading eligibility:', e);
@@ -70,6 +72,7 @@ const PayoutsPage = () => {
     
     try {
       const data = await paymentService.getPayouts();
+      console.log('Payouts data:', data);
       setPayouts(data.payouts || []);
       setPayoutsSummary(data.summary || null);
     } catch (error) {
@@ -78,6 +81,32 @@ const PayoutsPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // ✅ Fixed: Only format if payouts exist
+  const formatForExport = () => {
+    if (!payouts || payouts.length === 0) {
+      return [];
+    }
+    
+    return payouts.map(payout => ({
+      'Payout ID': payout.payoutId || 'N/A',
+      'Amount': payout.amount ? `₹${payout.amount}` : 'N/A',
+      'Commission': payout.commission ? `₹${payout.commission}` : 'N/A',
+      'Net Amount': payout.netAmount ? `₹${payout.netAmount}` : 'N/A',
+      'Status': payout.status || 'N/A',
+      'Transfer Mode': payout.transferMode === 'bank_transfer' ? 'Bank Transfer' : payout.transferMode === 'upi' ? 'UPI' : 'N/A',
+      'UPI ID': payout.beneficiaryDetails?.upiId || 'N/A',
+      'Account Number': payout.beneficiaryDetails?.accountNumber || 'N/A',
+      'IFSC Code': payout.beneficiaryDetails?.ifscCode || 'N/A',
+      'Account Holder': payout.beneficiaryDetails?.accountHolderName || 'N/A',
+      'Bank Name': payout.beneficiaryDetails?.bankName || 'N/A',
+      'Requested At': payout.requestedAt ? formatDate(payout.requestedAt) : 'N/A',
+      'Approved At': payout.approvedAt ? formatDate(payout.approvedAt) : 'N/A',
+      'Completed At': payout.completedAt ? formatDate(payout.completedAt) : 'N/A',
+      'Notes': payout.adminNotes || 'N/A',
+      'UTR': payout.utr || 'N/A'
+    }));
   };
 
   const handleRequestPayout = async (e) => {
@@ -89,12 +118,14 @@ const PayoutsPage = () => {
       const amt = parseFloat(requestData.amount);
       
       if (!eligibility.can_request_payout) {
-        throw new Error('You are not eligible to request a payout at this time.');
+        throw new Error('You are not eligible to request a payout at this time. Wait for settlement to complete.');
       }
-      if (amt < eligibility.minimum_payout_amount) {
-        throw new Error(`Minimum payout amount is ₹${eligibility.minimum_payout_amount}.`);
+      
+      if (amt <= 0) {
+        throw new Error('Payout amount must be greater than 0.');
       }
-      if (amt > eligibility.maximum_payout_amount) {
+      
+      if (amt > parseFloat(eligibility.maximum_payout_amount)) {
         throw new Error(`Maximum payout amount is ₹${eligibility.maximum_payout_amount}.`);
       }
 
@@ -113,7 +144,7 @@ const PayoutsPage = () => {
         notes: requestData.notes
       };
       
-      const result = await paymentService.requestPayout(payoutData);
+      await paymentService.requestPayout(payoutData);
       setShowRequestForm(false);
       setToast({ message: 'Payout request submitted successfully!', type: 'success' });
       resetForm();
@@ -170,13 +201,17 @@ const PayoutsPage = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      return new Date(dateString).toLocaleString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return 'Invalid Date';
+    }
   };
 
   const getStatusIcon = (status) => {
@@ -185,6 +220,7 @@ const PayoutsPage = () => {
         return <FiCheck className="status-icon" />;
       case 'failed':
       case 'cancelled':
+      case 'rejected':
         return <FiX className="status-icon" />;
       case 'requested':
       case 'pending':
@@ -201,7 +237,7 @@ const PayoutsPage = () => {
       <main className="page-main">
         <div className="page-header">
           <div>
-            <h1> Payouts Management</h1>
+            <h1><RiMoneyDollarCircleLine /> Payouts Management</h1>
             <p>Request and track your payout withdrawals</p>
           </div>
           <div className="header-actions">
@@ -216,6 +252,16 @@ const PayoutsPage = () => {
               <FiRefreshCw className={loading ? 'spinning' : ''} />
               {loading ? 'Loading...' : 'Refresh'}
             </button>
+            
+            {/* ✅ Export Button - Only show if payouts exist */}
+            {payouts.length > 0 && (
+              <ExportCSV 
+                data={formatForExport()} 
+                filename={`payouts_${new Date().toISOString().split('T')[0]}.csv`}
+                className="export-btn"
+              />
+            )}
+            
             <button 
               onClick={() => setShowRequestForm(!showRequestForm)} 
               className="primary-btn" 
@@ -244,7 +290,7 @@ const PayoutsPage = () => {
                 <div className="balance-content">
                   <div className="balance-label">Available Balance (Settled)</div>
                   <div className="balance-amount">
-                    {formatCurrency(balance.raw?.balance?.available_balance || balance.availableBalance)}
+                    {formatCurrency(balance.balance?.available_balance || 0)}
                   </div>
                   <div className="balance-description">
                     ✓ Ready to withdraw
@@ -260,10 +306,10 @@ const PayoutsPage = () => {
                 <div className="balance-content">
                   <div className="balance-label">Unsettled Balance</div>
                   <div className="balance-amount">
-                    {formatCurrency(balance.raw?.balance?.unsettled_net_revenue || 0)}
+                    {formatCurrency(balance.balance?.unsettled_net_revenue || 0)}
                   </div>
                   <div className="balance-description">
-                    ⏳ Settles tomorrow 3 PM
+                    ⏳ {balance.settlement_info?.next_settlement || 'Settling soon'}
                   </div>
                 </div>
               </div>
@@ -276,7 +322,7 @@ const PayoutsPage = () => {
                 <div className="balance-content">
                   <div className="balance-label">Pending Payouts</div>
                   <div className="balance-amount">
-                    {formatCurrency(balance.pendingBalance)}
+                    {formatCurrency(balance.balance?.pending_payouts || 0)}
                   </div>
                   <div className="balance-description">
                     Awaiting processing
@@ -292,7 +338,7 @@ const PayoutsPage = () => {
                 <div className="balance-content">
                   <div className="balance-label">Total Commission</div>
                   <div className="balance-amount">
-                    {formatCurrency(balance.commissionDeducted)}
+                    {formatCurrency(balance.balance?.total_commission || 0)}
                   </div>
                   <div className="balance-description">
                     Gateway charges
@@ -302,18 +348,41 @@ const PayoutsPage = () => {
             </div>
           )}
 
-          {/* Settlement Warning Banner */}
-          {balance?.raw?.settlement_info?.unsettled_transactions > 0 && (
-            <div className="settlement-warning-banner">
-              <div className="banner-icon">
+          {/* Settlement Info Banner */}
+          {balance?.settlement_info && (
+            <div className="settlement-info-card">
+              <div className="settlement-header">
                 <FiInfo />
+                <h4>Settlement Information - T+1 Policy</h4>
               </div>
-              <div className="banner-content">
-                <strong>Settlement Notice:</strong>{' '}
-                You have {formatCurrency(balance.raw.balance.unsettled_net_revenue)} in unsettled funds{' '}
-                from {balance.raw.settlement_info.unsettled_transactions} transaction(s).{' '}
-                These funds will be available for payout after tomorrow's 3 PM settlement.
+              <div className="settlement-details">
+                <div className="settlement-stat">
+                  <div className="stat-label">Settled Transactions</div>
+                  <div className="stat-value success">{balance.settlement_info.settled_transactions || 0}</div>
+                </div>
+                <div className="settlement-stat">
+                  <div className="stat-label">Unsettled Transactions</div>
+                  <div className="stat-value warning">{balance.settlement_info.unsettled_transactions || 0}</div>
+                </div>
+                <div className="settlement-stat">
+                  <div className="stat-label">Next Settlement</div>
+                  <div className="stat-value">{balance.settlement_info.next_settlement || 'N/A'}</div>
+                </div>
               </div>
+              <div className="settlement-policy">
+                <p><strong>Settlement Policy:</strong> {balance.settlement_info.settlement_policy}</p>
+                <p><strong>Weekend Policy:</strong> {balance.settlement_info.weekend_policy}</p>
+              </div>
+              {balance.settlement_info.settlement_examples && (
+                <div className="settlement-examples">
+                  <h5>Settlement Examples:</h5>
+                  <ul>
+                    {Object.entries(balance.settlement_info.settlement_examples).map(([day, info]) => (
+                      <li key={day}><strong>{day}:</strong> {info}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
@@ -323,7 +392,7 @@ const PayoutsPage = () => {
               <h3><FiPercent /> Payout Statistics</h3>
               <div className="summary-cards-grid">
                 <div className="summary-stat-card">
-                  <div className="stat-icon"></div>
+                  <div className="stat-icon"><RiMoneyDollarCircleLine /></div>
                   <div className="stat-content">
                     <div className="stat-value">{payoutsSummary.total_payout_requests || 0}</div>
                     <div className="stat-label">Total Requests</div>
@@ -361,15 +430,15 @@ const PayoutsPage = () => {
 
           {/* Commission Info */}
           <div className="info-message">
-            <FiInfo /> <strong>Payout Charges:</strong> ₹500-₹1000: Flat ₹35.40 | Above ₹1000: 1.77% 
+            <FiInfo /> <strong>Payout Charges:</strong> ₹500-₹1000: Flat ₹35.40 | Above ₹1000: 1.77% (includes 18% GST)
           </div>
 
           {/* Eligibility Notice */}
           {!eligibility.can_request_payout && (
             <div className="warning-message">
-              <FiAlertCircle /> <strong>Cannot Request Payout:</strong> You need at least ₹500 in settled balance to request a payout. 
-              {balance?.raw?.settlement_info?.unsettled_transactions > 0 && (
-                <span> Your unsettled funds will be available T+1 or T+2 3 PM settlement.</span>
+              <FiAlertCircle /> <strong>Cannot Request Payout:</strong> {balance?.payout_eligibility?.reason || 'No settled balance available.'}
+              {balance?.settlement_info?.unsettled_transactions > 0 && (
+                <span> Your unsettled funds will be available after {balance.settlement_info.next_settlement}.</span>
               )}
             </div>
           )}
@@ -388,13 +457,13 @@ const PayoutsPage = () => {
                       value={requestData.amount}
                       onChange={(e) => handleInputChange('amount', e.target.value)}
                       required
-                      min={eligibility.minimum_payout_amount}
+                      min={0.01}
                       max={eligibility.maximum_payout_amount}
                       step="0.01"
-                      placeholder={`Min: ₹${eligibility.minimum_payout_amount}`}
+                      placeholder={`Max: ₹${eligibility.maximum_payout_amount}`}
                     />
                     <small style={{ fontSize: '12px', color: '#666' }}>
-                      Min: ₹{eligibility.minimum_payout_amount} | Max: ₹{eligibility.maximum_payout_amount}
+                      Available: ₹{eligibility.maximum_payout_amount}
                     </small>
                   </div>
                   
@@ -403,7 +472,6 @@ const PayoutsPage = () => {
                     <select
                       value={requestData.transferMode}
                       onChange={(e) => {
-                        handleInputChange('transferMode', e.target.value);
                         resetForm();
                         handleInputChange('transferMode', e.target.value);
                       }}
@@ -577,6 +645,12 @@ const PayoutsPage = () => {
                               <span className="detail-label">Requested:</span>
                               <span className="detail-value">{formatDate(payout.requestedAt)}</span>
                             </div>
+                            {payout.utr && (
+                              <div className="detail-row">
+                                <span className="detail-label">UTR:</span>
+                                <span className="detail-value">{payout.utr}</span>
+                              </div>
+                            )}
                             {payout.adminNotes && (
                               <div className="detail-row">
                                 <span className="detail-label">Notes:</span>
@@ -591,7 +665,7 @@ const PayoutsPage = () => {
                 </>
               ) : (
                 <div className="empty-state">
-                  <div className="empty-icon"></div>
+                  <div className="empty-icon"><RiMoneyDollarCircleLine /></div>
                   <h3>No Payouts Found</h3>
                   <p>No payout requests have been made yet.</p>
                   <button 
