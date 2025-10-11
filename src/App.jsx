@@ -13,91 +13,100 @@ import SuperadminPayoutsPage from './components/pages/PayoutsManagement';
 import WebhookPage from './components/pages/WebhookPage';
 import AuthWrapper from './components/AuthWrapper';
 import { USER_ROLES } from './constants/api';
+import TransactionDetailPage from './components/pages/TransactionDetailPage';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route 
-          path="/superadmin" 
+        <Route
+          path="/superadmin"
           element={
             <AuthWrapper requiredRole={USER_ROLES.SUPERADMIN}>
               <SuperadminDashboard />
             </AuthWrapper>
-          } 
+          }
         />
-        <Route 
-          path="/superadmin/signup" 
+        <Route
+          path="/superadmin/signup"
           element={
             <AuthWrapper requiredRole={USER_ROLES.SUPERADMIN}>
               <SuperadminSignupPage />
             </AuthWrapper>
-          } 
+          }
         />
-        <Route 
-          path="/superadmin/transactions" 
+        <Route
+          path="/superadmin/transactions"
           element={
             <AuthWrapper requiredRole={USER_ROLES.SUPERADMIN}>
               <SuperadminTransactionsPage />
             </AuthWrapper>
-          } 
+          }
         />
-        <Route 
-          path="/superadmin/payouts" 
+        <Route
+          path="/superadmin/payouts"
           element={
             <AuthWrapper requiredRole={USER_ROLES.SUPERADMIN}>
               <SuperadminPayoutsPage />
             </AuthWrapper>
-          } 
+          }
         />
-        <Route 
-          path="/admin" 
+        <Route
+          path="/admin"
           element={
             <AuthWrapper requiredRole={USER_ROLES.ADMIN}>
               <AdminDashboard />
             </AuthWrapper>
-          } 
+          }
         />
-        <Route 
-          path="/admin/transactions" 
+        <Route
+          path="/admin/transactions"
           element={
             <AuthWrapper requiredRole={USER_ROLES.ADMIN}>
               <TransactionsPage />
             </AuthWrapper>
-          } 
+          }
         />
-        <Route 
-          path="/admin/payouts" 
+        <Route
+          path="/admin/payouts"
           element={
             <AuthWrapper requiredRole={USER_ROLES.ADMIN}>
               <PayoutsPage />
             </AuthWrapper>
-          } 
+          }
         />
-        <Route 
-          path="/admin/payins" 
+        <Route
+          path="/admin/payins"
           element={
             <AuthWrapper requiredRole={USER_ROLES.ADMIN}>
               <BalancePage />
             </AuthWrapper>
-          } 
+          }
         />
-        <Route 
-          path="/admin/payments" 
+        <Route
+          path="/admin/transactions/:transactionId"
+          element={
+            <AuthWrapper requiredRole={USER_ROLES.ADMIN}>
+              <TransactionDetailPage />
+            </AuthWrapper>
+          }
+        />
+        <Route
+          path="/admin/payments"
           element={
             <AuthWrapper requiredRole={USER_ROLES.ADMIN}>
               <PaymentsPage />
             </AuthWrapper>
-          } 
+          }
         />
-        <Route 
-          path="/admin/webhooks" 
+        <Route
+          path="/admin/webhooks"
           element={
             <AuthWrapper requiredRole={USER_ROLES.ADMIN}>
               <WebhookPage />
             </AuthWrapper>
-          } 
+          }
         />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>

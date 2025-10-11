@@ -5,6 +5,7 @@ import Sidebar from '../Sidebar';
 import './PageLayout.css';
 import ExportCSV from '../ExportCSV';
 import { FiRefreshCw } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
@@ -12,7 +13,8 @@ const TransactionsPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('payin'); // 'payin' | 'payout'
-  
+  const navigate = useNavigate();
+
   // Filter states
   const [filters, setFilters] = useState({
     page: 1,
@@ -34,7 +36,7 @@ const TransactionsPage = () => {
   const fetchTransactions = async () => {
     setLoading(true);
     setError('');
-    
+
     try {
       // Determine status filter based on active tab
       let statusFilter = '';
@@ -122,7 +124,7 @@ const TransactionsPage = () => {
         return 'status-pending';
     }
   };
- // Format data for CSV export
+  // Format data for CSV export
   const formatForExport = () => {
     return transactions.map(txn => ({
       'Transaction ID': txn.transaction_id,
@@ -149,32 +151,32 @@ const TransactionsPage = () => {
         <div className="page-header">
           <h1>Transactions</h1>
           <p>View and manage all payment transactions</p>
-          
-           <div className="header-actions">
+
+          <div className="header-actions">
             <button onClick={fetchTransactions} disabled={loading} className="refresh-btn">
               <FiRefreshCw className={loading ? 'spinning' : ''} />
               {loading ? 'Loading...' : 'Refresh'}
             </button>
             {/* ✅ Export Button */}
-            <ExportCSV 
-              data={formatForExport()} 
+            <ExportCSV
+              data={formatForExport()}
               filename={`transactions_${new Date().toISOString().split('T')[0]}.csv`}
               className="primary-btn"
             />
           </div>
         </div>
-        
+
         <div className="page-content">
           {/* Tabs */}
           <div className="tabs">
-            <button 
-              className={`tab ${activeTab === 'payin' ? 'active' : ''}`} 
+            <button
+              className={`tab ${activeTab === 'payin' ? 'active' : ''}`}
               onClick={() => handleTabChange('payin')}
             >
               Payin
             </button>
-            <button 
-              className={`tab ${activeTab === 'payout' ? 'active' : ''}`} 
+            <button
+              className={`tab ${activeTab === 'payout' ? 'active' : ''}`}
               onClick={() => handleTabChange('payout')}
             >
               Payout
@@ -183,29 +185,29 @@ const TransactionsPage = () => {
 
           {/* Filter bar */}
           <div className="filter-bar">
-            <input 
-              className="filter-input" 
-              value={filters.search} 
-              onChange={(e) => handleFilterChange('search', e.target.value)} 
-              placeholder="Search transactions..." 
+            <input
+              className="filter-input"
+              value={filters.search}
+              onChange={(e) => handleFilterChange('search', e.target.value)}
+              placeholder="Search transactions..."
             />
-            <input 
-              className="filter-date" 
-              type="date" 
-              value={filters.start_date} 
-              onChange={(e) => handleFilterChange('start_date', e.target.value)} 
+            <input
+              className="filter-date"
+              type="date"
+              value={filters.start_date}
+              onChange={(e) => handleFilterChange('start_date', e.target.value)}
               placeholder="Start Date"
             />
-            <input 
-              className="filter-date" 
-              type="date" 
-              value={filters.end_date} 
-              onChange={(e) => handleFilterChange('end_date', e.target.value)} 
+            <input
+              className="filter-date"
+              type="date"
+              value={filters.end_date}
+              onChange={(e) => handleFilterChange('end_date', e.target.value)}
               placeholder="End Date"
             />
-            <select 
-              className="filter-select" 
-              value={filters.status} 
+            <select
+              className="filter-select"
+              value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
             >
               <option value="">All Status</option>
@@ -217,9 +219,9 @@ const TransactionsPage = () => {
               <option value="refunded">Refunded</option>
               <option value="partial_refund">Partial Refund</option>
             </select>
-            <select 
-              className="filter-select" 
-              value={filters.payment_method} 
+            <select
+              className="filter-select"
+              value={filters.payment_method}
               onChange={(e) => handleFilterChange('payment_method', e.target.value)}
             >
               <option value="">All Methods</option>
@@ -228,25 +230,25 @@ const TransactionsPage = () => {
               <option value="netbanking">Net Banking</option>
               <option value="wallet">Wallet</option>
             </select>
-            <select 
-              className="filter-select" 
-              value={filters.sort_by} 
+            <select
+              className="filter-select"
+              value={filters.sort_by}
               onChange={(e) => handleFilterChange('sort_by', e.target.value)}
             >
               <option value="createdAt">Sort by Date</option>
               <option value="amount">Sort by Amount</option>
             </select>
-            <select 
-              className="filter-select" 
-              value={filters.sort_order} 
+            <select
+              className="filter-select"
+              value={filters.sort_order}
               onChange={(e) => handleFilterChange('sort_order', e.target.value)}
             >
               <option value="desc">Descending</option>
               <option value="asc">Ascending</option>
             </select>
-            <button 
-              className="secondary-btn" 
-              onClick={fetchTransactions} 
+            <button
+              className="secondary-btn"
+              onClick={fetchTransactions}
               disabled={loading}
             >
               {loading ? 'Loading...' : 'Apply Filters'}
@@ -254,7 +256,7 @@ const TransactionsPage = () => {
           </div>
 
           {error && <div className="error-message">{error}</div>}
-          
+
           {loading ? (
             <div className="loading-state">
               <div className="loading-spinner"></div>
@@ -281,8 +283,12 @@ const TransactionsPage = () => {
                     </thead>
                     <tbody>
                       {transactions.map((transaction, index) => (
-                        <tr key={transaction.transaction_id || index}>
-                          <td className="transaction-id">{transaction.transaction_id || '-'}</td>
+                        <tr
+                          key={transaction.transaction_id || index}
+                          className="clickable-row"
+                          onClick={() => navigate(`/admin/transactions/${transaction.transaction_id}`)}
+                          style={{ cursor: 'pointer' }}
+                        >                          <td className="transaction-id">{transaction.transaction_id || '-'}</td>
                           <td className="order-id">{transaction.order_id || '-'}</td>
                           <td className="customer-info">
                             <div className="customer-name">{transaction.customer_name || '-'}</div>
@@ -320,7 +326,7 @@ const TransactionsPage = () => {
                     Showing {((pagination.current_page - 1) * pagination.limit) + 1} to {Math.min(pagination.current_page * pagination.limit, pagination.total_count)} of {pagination.total_count} transactions
                   </div>
                   <div className="pagination-controls">
-                    <button 
+                    <button
                       onClick={() => handlePageChange(pagination.current_page - 1)}
                       disabled={!pagination.has_prev_page || loading}
                       className="pagination-btn"
@@ -330,7 +336,7 @@ const TransactionsPage = () => {
                     <span className="pagination-page">
                       Page {pagination.current_page} of {pagination.total_pages}
                     </span>
-                    <button 
+                    <button
                       onClick={() => handlePageChange(pagination.current_page + 1)}
                       disabled={!pagination.has_next_page || loading}
                       className="pagination-btn"
