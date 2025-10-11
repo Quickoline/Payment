@@ -1,6 +1,6 @@
 // API Constants
 
-export const BASE_URL = 'https://api.ninex-group.com/api';
+export const BASE_URL = 'http://localhost:5000/api';
 
 export const API_ENDPOINTS = {
   LOGIN: `${BASE_URL}/auth/login`,
@@ -10,6 +10,8 @@ export const API_ENDPOINTS = {
   
   // Payment Endpoints
   TRANSACTIONS: `${BASE_URL}/payments/transactions`,
+    TRANSACTION_DETAIL: (transactionId) => `${BASE_URL}/payments/merchant/transactions/${transactionId}`,
+
   PAYOUTS: `${BASE_URL}/payments/merchant/payouts`,
   BALANCE: `${BASE_URL}/payments/merchant/balance`,
   CREATE_LINK: `${BASE_URL}/razorpay/create-payment-link`,

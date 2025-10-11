@@ -139,20 +139,7 @@ const WebhookPage = () => {
           <h1>Webhook Configuration</h1>
           <p>Configure your webhook URL to receive real-time payment notifications</p>
           <div className="webhook-info">
-            <div className="info-card">
-              <h4>🔗 Razorpay Webhook URL</h4>
-              <p>Configure this URL in your Razorpay Dashboard:</p>
-              <div className="url-display">
-                <code>https://api.ninex-group.com/api/razorpay/webhook</code>
-                <button 
-                  onClick={() => copyToClipboard('https://api.ninex-group.com/api/razorpay/webhook')}
-                  className="copy-btn small"
-                  title="Copy Razorpay webhook URL"
-                >
-                  <FiCopy />
-                </button>
-              </div>
-            </div>
+            
           </div>
           <div className="header-actions">
             {!webhookConfig ? (

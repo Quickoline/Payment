@@ -50,7 +50,21 @@ class PaymentService {
       throw new Error(this.getApiErrorMessage(error, 'Failed to fetch all payouts'));
     }
   }
-
+ async getTransactionDetail(transactionId) {
+    try {
+      const token = authService.getToken();
+      if (!token) throw new Error("No authentication token found");
+      const url = API_ENDPOINTS.TRANSACTION_DETAIL(transactionId);
+      const response = await axios.get(url, {
+        headers: {
+          "x-auth-token": `${token}`,
+        }
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || error.message || "Failed to fetch transaction detail");
+    }
+  }
   // SuperAdmin: Approve payout
   async approvePayout(payoutId, notes = '') {
     try {

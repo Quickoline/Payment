@@ -55,7 +55,7 @@ const BalancePage = () => {
         <div className="page-header">
           <div>
             <h1><FiDollarSign /> Balance & Revenue</h1>
-            <p>Complete financial overview with T+1 settlement tracking</p>
+            <p>Complete financial overview with T+1/2 settlement tracking</p>
           </div>
           <button 
             onClick={fetchBalance} 
@@ -155,7 +155,7 @@ const BalancePage = () => {
                     <FiInfo />
                   </div>
                   <div className="banner-content">
-                    <strong>Settlement Notice (T+1):</strong>{' '}
+                    <strong>Settlement Notice (T+1/2):</strong>{' '}
                     {balance.settlement_info.unsettled_transactions} transaction(s) worth{' '}
                     <strong>{formatCurrency(balance.balance.unsettled_net_revenue)}</strong>{' '}
                     will be available for payout {balance.settlement_info.next_settlement_status}.
@@ -166,7 +166,7 @@ const BalancePage = () => {
               {/* Settlement Schedule Info Card */}
               {balance.settlement_info && (
                 <div className="settlement-section">
-                  <h3><FiClock /> Settlement Information - T+1 Policy</h3>
+                  <h3><FiClock /> Settlement Information - T+1/2 Policy</h3>
                   <div className="settlement-card">
                     <div className="settlement-stats">
                       <div className="stat-item">
@@ -190,20 +190,21 @@ const BalancePage = () => {
                     </div>
                     
                     <div className="settlement-policy">
-                      <p><strong>Settlement Policy:</strong> {balance.settlement_info.settlement_policy || 'T+1 settlement (24 hours after payment)'}</p>
-                      <p><strong>Weekend Policy:</strong> {balance.settlement_info.weekend_policy || 'Saturday and Sunday are off. Weekend payments settle on Monday.'}</p>
+                      <p><strong>Settlement Policy:</strong> {'T+1/2 settlement'}</p>
+                      <p><strong>Weekend Policy:</strong> {'Saturday and Sunday are off. Weekend payments settle on Monday.'}</p>
                     </div>
 
-                    {balance.settlement_info.settlement_examples && (
+                  
                       <div className="settlement-examples">
-                        <h5>Settlement Examples:</h5>
-                        <ul>
-                          {Object.entries(balance.settlement_info.settlement_examples).map(([day, info]) => (
-                            <li key={day}><strong>{day}:</strong> {info}</li>
-                          ))}
-                        </ul>
+                        
+                        Once you request a payout, the amount will typically start reflecting in your bank the same day.
+However, due to bank processing delays or if the amount exceeds ₹2 lakh, it may take 24–48 hours to appear in your account, as per bank policies.
+Please ensure you provide the correct bank account details for smooth processing.
+
+
+If any available funds are not withdrawn via payout, they will automatically be settled to the provided bank account.
                       </div>
-                    )}
+                   
                   </div>
                 </div>
               )}
@@ -332,25 +333,19 @@ const BalancePage = () => {
                     <div className="commission-card">
                       <div className="commission-title">Payin Commission</div>
                       <div className="commission-rate">3.8%</div>
-                      <div className="commission-description">
-                        + 18% GST (Effective: 4.484%)
-                      </div>
+                     
                     </div>
                     
                     <div className="commission-card">
                       <div className="commission-title">Payout (₹500-₹1000)</div>
                       <div className="commission-rate">₹30</div>
-                      <div className="commission-description">
-                        + 18% GST (₹35.40 flat fee)
-                      </div>
+                     
                     </div>
                     
                     <div className="commission-card">
                       <div className="commission-title">Payout (Above ₹1000)</div>
                       <div className="commission-rate">1.50%</div>
-                      <div className="commission-description">
-                        + 18% GST (Effective: 1.77%)
-                      </div>
+                      
                     </div>
                   </div>
                 </div>
