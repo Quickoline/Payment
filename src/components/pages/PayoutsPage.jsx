@@ -8,14 +8,17 @@ import {
   FiAlertCircle,
   FiInfo,
   FiPercent,
-  FiDollarSign
+  FiDollarSign,
+  FiDownload
 } from 'react-icons/fi';
 import { RiMoneyDollarCircleLine } from 'react-icons/ri';
 import paymentService from '../../services/paymentService';
 import Sidebar from '../Sidebar';
 import ExportCSV from '../ExportCSV';
-import './PageLayout.css';
 import Toast from '../ui/Toast';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 
 const PayoutsPage = () => {
   const [payouts, setPayouts] = useState([]);
@@ -44,6 +47,73 @@ const PayoutsPage = () => {
     },
     notes: ''
   });
+ // Function to generate and download invoice PDF
+  const downloadInvoicePDF = (payout) => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text('Payout Invoice', 14, 22);
+
+    doc.setFontSize(12);
+    doc.text(`Payout ID: ${payout.payoutId}`, 14, 32);
+    doc.text(`Status: ${payout.status}`, 14, 38);
+    doc.text(`Requested At: ${formatDate(payout.requestedAt)}`, 14, 44);
+
+    if(payout.approvedAt){
+      doc.text(`Approved At: ${formatDate(payout.approvedAt)}`, 14, 50);
+    }
+    if(payout.completedAt){
+      doc.text(`Completed At: ${formatDate(payout.completedAt)}`, 14, 56);
+    }
+    if(payout.utr){
+      doc.text(`UTR / Transaction Ref: ${payout.utr}`, 14, 62);
+    }
+
+    // Beneficiary Details Section
+    doc.setFontSize(14);
+    doc.text('Beneficiary Details:', 14, 72);
+
+    doc.setFontSize(12);
+    const beneficiary = payout.beneficiaryDetails || {};
+    let y = 80;
+    if(beneficiary.accountHolderName) {
+      doc.text(`Account Holder Name: ${beneficiary.accountHolderName}`, 14, y);
+      y += 6;
+    }
+    if(beneficiary.bankName) {
+      doc.text(`Bank Name: ${beneficiary.bankName}`, 14, y);
+      y += 6;
+    }
+    if(beneficiary.branchName) {
+      doc.text(`Branch Name: ${beneficiary.branchName}`, 14, y);
+      y += 6;
+    }
+    if(beneficiary.accountNumber) {
+      doc.text(`Account Number: ${beneficiary.accountNumber}`, 14, y);
+      y += 6;
+    }
+    if(beneficiary.ifscCode) {
+      doc.text(`IFSC Code: ${beneficiary.ifscCode}`, 14, y);
+      y += 6;
+    }
+    if(beneficiary.upiId) {
+      doc.text(`UPI ID: ${beneficiary.upiId}`, 14, y);
+      y += 6;
+    }
+
+    // Payment Details Table
+    autoTable(doc, {
+      startY: y + 8,
+      head: [['Description', 'Amount (₹)']],
+      body: [
+        ['Gross Amount', payout.amount.toFixed(2)],
+        ['Commission Deducted', `- ${payout.commission.toFixed(2)}`],
+        ['Net Amount Paid', payout.netAmount.toFixed(2)]
+      ],
+    });
+
+    doc.save(`PayoutInvoice_${payout.payoutId}.pdf`);
+  };
 
   useEffect(() => {
     fetchPayouts();
@@ -353,7 +423,7 @@ const PayoutsPage = () => {
             <div className="settlement-info-card">
               <div className="settlement-header">
                 <FiInfo />
-                <h4>Settlement Information - T+1 Policy</h4>
+                <h4>Settlement Information - T+1/2 Policy</h4>
               </div>
               <div className="settlement-details">
                 <div className="settlement-stat">
@@ -370,19 +440,18 @@ const PayoutsPage = () => {
                 </div>
               </div>
               <div className="settlement-policy">
-                <p><strong>Settlement Policy:</strong> {balance.settlement_info.settlement_policy}</p>
+                <p><strong>Settlement Policy:</strong> T+1/2 settlement  </p>
                 <p><strong>Weekend Policy:</strong> {balance.settlement_info.weekend_policy}</p>
               </div>
-              {balance.settlement_info.settlement_examples && (
-                <div className="settlement-examples">
-                  <h5>Settlement Examples:</h5>
-                  <ul>
-                    {Object.entries(balance.settlement_info.settlement_examples).map(([day, info]) => (
-                      <li key={day}><strong>{day}:</strong> {info}</li>
-                    ))}
-                  </ul>
+                 <div className="settlement-examples">
+                   Once you request a payout, the amount will typically start reflecting in your bank the same day.
+However, due to bank processing delays or if the amount exceeds ₹2 lakh, it may take 24–48 hours to appear in your account, as per bank policies.
+Please ensure you provide the correct bank account details for smooth processing.
+
+
+If any available funds are not withdrawn via payout, they will automatically be settled to the provided bank account.
                 </div>
-              )}
+               
             </div>
           )}
 
@@ -430,7 +499,7 @@ const PayoutsPage = () => {
 
           {/* Commission Info */}
           <div className="info-message">
-            <FiInfo /> <strong>Payout Charges:</strong> ₹500-₹1000: Flat ₹35.40 | Above ₹1000: 1.77% (includes 18% GST)
+            <FiInfo /> <strong>Payout Charges:</strong> ₹500-₹1000: Flat ₹35.40 | Above ₹1000: 1.77% 
           </div>
 
           {/* Eligibility Notice */}
@@ -595,8 +664,7 @@ const PayoutsPage = () => {
             </div>
           )}
           
-          {/* Payouts List */}
-          {loading ? (
+           {loading ? (
             <div className="loading-state">
               <div className="loading-spinner"></div>
               <p>Loading payouts...</p>
@@ -645,16 +713,30 @@ const PayoutsPage = () => {
                               <span className="detail-label">Requested:</span>
                               <span className="detail-value">{formatDate(payout.requestedAt)}</span>
                             </div>
+
                             {payout.utr && (
                               <div className="detail-row">
                                 <span className="detail-label">UTR:</span>
                                 <span className="detail-value">{payout.utr}</span>
                               </div>
                             )}
+
                             {payout.adminNotes && (
                               <div className="detail-row">
                                 <span className="detail-label">Notes:</span>
                                 <span className="detail-value">{payout.adminNotes}</span>
+                              </div>
+                            )}
+
+                            {/* ✅ Download Invoice Button - visible only if payout status is 'approved' or 'pending' or 'completed' */}
+                            {(payout.status === 'approved' || payout.status === 'pending' || payout.status === 'completed') && (
+                              <div className="invoice-btn-wrapper">
+                                <button 
+                                  className="primary-btn"
+                                  onClick={() => downloadInvoicePDF(payout)}
+                                >
+                                  <FiDownload /> Download Invoice
+                                </button>
                               </div>
                             )}
                           </div>
