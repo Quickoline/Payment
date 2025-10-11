@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiDownload } from 'react-icons/fi';
-
+import './ExportCSV.css';
 const ExportCSV = ({ data, filename = 'transactions.csv', className = '' }) => {
   const convertToCSV = (objArray) => {
     if (!objArray || objArray.length === 0) {
