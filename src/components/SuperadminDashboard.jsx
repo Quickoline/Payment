@@ -1,100 +1,493 @@
+// components/SuperadminDashboard.jsx
+
 import React, { useState, useEffect } from 'react';
-import { MdDashboard } from 'react-icons/md';
+import { 
+  FiUsers, 
+  FiTrendingUp, 
+  FiDollarSign, 
+  FiCreditCard,
+  FiCheckCircle,
+  FiXCircle,
+  FiClock,
+  FiAlertCircle,
+  FiRefreshCw,
+  FiArrowUp,
+  FiArrowDown,
+  FiPackage
+} from 'react-icons/fi';
 import { HiOutlineChartBar } from 'react-icons/hi2';
 import { TbArrowsTransferDown } from 'react-icons/tb';
-import { FiUsers, FiSettings } from 'react-icons/fi';
+import { RiMoneyDollarCircleLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
-import authService from '../services/authService';
-import signupService from '../services/signupService';
 import superadminPaymentService from '../services/superadminPaymentService';
 import Sidebar from './Sidebar';
+import './Dashboard.css';
 import './Dashboard.css';
 import './pages/PageLayout.css';
 
 const SuperadminDashboard = () => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await superadminPaymentService.getDashboardStats();
+      console.log('Dashboard stats:', data);
+      setStats(data);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return `₹${parseFloat(amount || 0).toLocaleString('en-IN', { 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2 
+    })}`;
+  };
+
+  const formatNumber = (num) => {
+    return parseFloat(num || 0).toLocaleString('en-IN');
+  };
+
+  if (loading && !stats) {
+    return (
+      <div className="page-container with-sidebar">
+        <Sidebar />
+        <main className="page-main">
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>Loading dashboard...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container with-sidebar">
       <Sidebar />
       <main className="page-main">
         <div className="page-header">
-          <h1>Superadmin Dashboard</h1>
-          <p>Welcome to your superadmin dashboard. Manage users, transactions, and system-wide operations.</p>
+          <div>
+            <h1>SuperAdmin Dashboard</h1>
+            <p>Complete overview of platform operations and statistics</p>
+          </div>
+          <button 
+            onClick={fetchStats} 
+            disabled={loading} 
+            className="refresh-btn"
+          >
+            <FiRefreshCw className={loading ? 'spinning' : ''} />
+            Refresh
+          </button>
         </div>
         
         <div className="page-content">
-          {/* Quick Access Cards */}
-          <div className="quick-access">
-            <h2>Quick Access</h2>
-            <p>Navigate to different sections of the superadmin system.</p>
-            
-            <div className="access-grid">
-              <div className="access-card" onClick={() => navigate('/superadmin/signup')}>
-                <div className="access-icon"><FiUsers /></div>
-                <h3>User Registration</h3>
-                <p>Register new users for the platform</p>
-              </div>
-              
-              <div className="access-card" onClick={() => navigate('/superadmin/transactions')}>
-                <div className="access-icon"><HiOutlineChartBar /></div>
-                <h3>Admin Transactions</h3>
-                <p>View and manage all admin transactions</p>
-              </div>
-              
-              <div className="access-card" onClick={() => navigate('/superadmin/payouts')}>
-                <div className="access-icon"><TbArrowsTransferDown /></div>
-                <h3>Admin Payouts</h3>
-                <p>Manage admin payouts and commissions</p>
-              </div>
-              
-              <div className="access-card" onClick={() => navigate('/admin')}>
-                <div className="access-icon"><FiSettings /></div>
-                <h3>Admin Features</h3>
-                <p>Access admin dashboard features</p>
-              </div>
+          {error && (
+            <div className="error-message">
+              <FiAlertCircle /> {error}
             </div>
-          </div>
+          )}
 
-          {/* System Overview */}
-          <div className="system-overview">
-            <h2>System Overview</h2>
-            <p>Monitor system-wide operations and statistics.</p>
-            
-            <div className="overview-cards">
-              <div className="overview-card">
-                <div className="overview-icon"><FiUsers /></div>
-                <div className="overview-content">
-                  <h3>User Management</h3>
-                  <p>Register and manage platform users</p>
+          {stats && (
+            <>
+              {/* Merchants Section */}
+              <div className="stats-section">
+                <div className="section-header">
+                  <h2><FiUsers /> Merchants</h2>
+                  <span className="section-count">{stats.merchants.total} Total</span>
+                </div>
+                <div className="stats-grid">
+                  <div className="stat-card primary">
+                    <div className="stat-icon">
+                      <FiUsers />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Total Merchants</div>
+                      <div className="stat-value">{formatNumber(stats.merchants.total)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card success">
+                    <div className="stat-icon">
+                      <FiCheckCircle />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Active</div>
+                      <div className="stat-value">{formatNumber(stats.merchants.active)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card warning">
+                    <div className="stat-icon">
+                      <FiClock />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Inactive</div>
+                      <div className="stat-value">{formatNumber(stats.merchants.inactive)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card info">
+                    <div className="stat-icon">
+                      <FiTrendingUp />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">New This Week</div>
+                      <div className="stat-value">{formatNumber(stats.merchants.new_this_week)}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              <div className="overview-card">
-                <div className="overview-icon"><HiOutlineChartBar /></div>
-                <div className="overview-content">
-                  <h3>Transaction Monitoring</h3>
-                  <p>Monitor all admin transactions across the platform</p>
+
+              {/* Transactions Section */}
+              <div className="stats-section">
+                <div className="section-header">
+                  <h2><HiOutlineChartBar /> Transactions</h2>
+                  <span className="section-count">{stats.transactions.total} Total</span>
+                </div>
+                <div className="stats-grid large">
+                  <div className="stat-card primary clickable" onClick={() => navigate('/superadmin/transactions')}>
+                    <div className="stat-icon">
+                      <HiOutlineChartBar />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Total Transactions</div>
+                      <div className="stat-value">{formatNumber(stats.transactions.total)}</div>
+                      <div className="stat-meta">
+                        Success Rate: {stats.transactions.success_rate}%
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card success">
+                    <div className="stat-icon">
+                      <FiCheckCircle />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Paid</div>
+                      <div className="stat-value">{formatNumber(stats.transactions.paid)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card warning">
+                    <div className="stat-icon">
+                      <FiClock />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Pending</div>
+                      <div className="stat-value">{formatNumber(stats.transactions.pending)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card error">
+                    <div className="stat-icon">
+                      <FiXCircle />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Failed</div>
+                      <div className="stat-value">{formatNumber(stats.transactions.failed)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card info">
+                    <div className="stat-icon">
+                      <FiCheckCircle />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Settled</div>
+                      <div className="stat-value">{formatNumber(stats.transactions.settled)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card tertiary">
+                    <div className="stat-icon">
+                      <FiClock />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Unsettled</div>
+                      <div className="stat-value">{formatNumber(stats.transactions.unsettled)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Today & Week Stats */}
+                <div className="stats-row">
+                  <div className="stat-mini">
+                    <div className="stat-mini-label">Today</div>
+                    <div className="stat-mini-value">{formatNumber(stats.transactions.today)}</div>
+                  </div>
+                  <div className="stat-mini">
+                    <div className="stat-mini-label">This Week</div>
+                    <div className="stat-mini-value">{formatNumber(stats.transactions.this_week)}</div>
+                  </div>
                 </div>
               </div>
-              
-              <div className="overview-card">
-                <div className="overview-icon"><TbArrowsTransferDown /></div>
-                <div className="overview-content">
-                  <h3>Payout Management</h3>
-                  <p>Manage admin payouts and commission structures</p>
+
+              {/* Revenue Section */}
+              <div className="stats-section">
+                <div className="section-header">
+                  <h2><FiDollarSign /> Revenue</h2>
+                  <span className="section-amount">{formatCurrency(stats.revenue.total)}</span>
+                </div>
+                <div className="stats-grid large">
+                  <div className="stat-card primary large">
+                    <div className="stat-icon">
+                      <FiDollarSign />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Total Revenue</div>
+                      <div className="stat-value">{formatCurrency(stats.revenue.total)}</div>
+                      <div className="stat-meta">
+                        Avg: {formatCurrency(stats.revenue.average_transaction)} per txn
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card success">
+                    <div className="stat-icon">
+                      <FiTrendingUp />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Commission Earned (3.8%)</div>
+                      <div className="stat-value">{formatCurrency(stats.revenue.commission_earned)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card info">
+                    <div className="stat-icon">
+                      <FiCreditCard />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Net Revenue</div>
+                      <div className="stat-value">{formatCurrency(stats.revenue.net_revenue)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card warning">
+                    <div className="stat-icon">
+                      <FiArrowDown />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Refunded</div>
+                      <div className="stat-value">{formatCurrency(stats.revenue.refunded)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="stats-row">
+                  <div className="stat-mini success">
+                    <div className="stat-mini-label">Today's Revenue</div>
+                    <div className="stat-mini-value">{formatCurrency(stats.revenue.today)}</div>
+                  </div>
+                  <div className="stat-mini success">
+                    <div className="stat-mini-label">This Week</div>
+                    <div className="stat-mini-value">{formatCurrency(stats.revenue.this_week)}</div>
+                  </div>
                 </div>
               </div>
-              
-              <div className="overview-card">
-                <div className="overview-icon"><FiSettings /></div>
-                <div className="overview-content">
-                  <h3>System Administration</h3>
-                  <p>Access advanced system configuration and settings</p>
+
+              {/* Payouts Section */}
+              <div className="stats-section">
+                <div className="section-header">
+                  <h2><TbArrowsTransferDown /> Payouts</h2>
+                  <span className="section-count">{stats.payouts.total_requests} Requests</span>
+                </div>
+                <div className="stats-grid large">
+                  <div className="stat-card primary clickable" onClick={() => navigate('/superadmin/payouts')}>
+                    <div className="stat-icon">
+                      <RiMoneyDollarCircleLine />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Total Requests</div>
+                      <div className="stat-value">{formatNumber(stats.payouts.total_requests)}</div>
+                      <div className="stat-meta">
+                        {formatCurrency(stats.payouts.total_amount_requested)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card warning">
+                    <div className="stat-icon">
+                      <FiAlertCircle />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Pending Approval</div>
+                      <div className="stat-value">{formatNumber(stats.payouts.requested)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card info">
+                    <div className="stat-icon">
+                      <FiClock />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Processing</div>
+                      <div className="stat-value">{formatNumber(stats.payouts.pending)}</div>
+                      <div className="stat-meta">
+                        {formatCurrency(stats.payouts.total_pending)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card success">
+                    <div className="stat-icon">
+                      <FiCheckCircle />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Completed</div>
+                      <div className="stat-value">{formatNumber(stats.payouts.completed)}</div>
+                      <div className="stat-meta">
+                        {formatCurrency(stats.payouts.total_completed)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card error">
+                    <div className="stat-icon">
+                      <FiXCircle />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Rejected</div>
+                      <div className="stat-value">{formatNumber(stats.payouts.rejected)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card tertiary">
+                    <div className="stat-icon">
+                      <FiDollarSign />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Commission Earned</div>
+                      <div className="stat-value">{formatCurrency(stats.payouts.commission_earned)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="stats-row">
+                  <div className="stat-mini info">
+                    <div className="stat-mini-label">Today's Requests</div>
+                    <div className="stat-mini-value">{formatNumber(stats.payouts.today)}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+
+              {/* Settlement Section */}
+              <div className="stats-section">
+                <div className="section-header">
+                  <h2><FiPackage /> Settlement Status</h2>
+                </div>
+                <div className="stats-grid">
+                  <div className="stat-card success">
+                    <div className="stat-icon">
+                      <FiCheckCircle />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Settled Transactions</div>
+                      <div className="stat-value">{formatNumber(stats.settlement.settled_transactions)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card warning">
+                    <div className="stat-icon">
+                      <FiClock />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Unsettled</div>
+                      <div className="stat-value">{formatNumber(stats.settlement.unsettled_transactions)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card info">
+                    <div className="stat-icon">
+                      <FiDollarSign />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Available for Payout</div>
+                      <div className="stat-value">{formatNumber(stats.settlement.available_for_payout)}</div>
+                      <div className="stat-meta">
+                        {formatCurrency(stats.settlement.available_balance)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card tertiary">
+                    <div className="stat-icon">
+                      <FiPackage />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">In Payouts</div>
+                      <div className="stat-value">{formatNumber(stats.settlement.in_payouts)}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Platform Revenue */}
+              <div className="stats-section">
+                <div className="section-header">
+                  <h2><FiTrendingUp /> Platform Revenue</h2>
+                  <span className="section-amount">{formatCurrency(stats.platform.total_commission_earned)}</span>
+                </div>
+                <div className="stats-grid">
+                  <div className="stat-card primary large">
+                    <div className="stat-icon">
+                      <FiDollarSign />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Total Commission</div>
+                      <div className="stat-value">{formatCurrency(stats.platform.total_commission_earned)}</div>
+                      <div className="stat-meta">
+                        Payin + Payout fees
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card success">
+                    <div className="stat-icon">
+                      <FiArrowUp />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Payin Commission (3.8%)</div>
+                      <div className="stat-value">{formatCurrency(stats.platform.payin_commission)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card info">
+                    <div className="stat-icon">
+                      <FiArrowDown />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Payout Commission (₹30)</div>
+                      <div className="stat-value">{formatCurrency(stats.platform.payout_commission)}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card tertiary">
+                    <div className="stat-icon">
+                      <FiTrendingUp />
+                    </div>
+                    <div className="stat-content">
+                      <div className="stat-label">Net Platform Revenue</div>
+                      <div className="stat-value">{formatCurrency(stats.platform.net_platform_revenue)}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </main>
     </div>
@@ -102,3 +495,4 @@ const SuperadminDashboard = () => {
 };
 
 export default SuperadminDashboard;
+
