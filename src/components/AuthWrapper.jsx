@@ -39,16 +39,22 @@ const AuthWrapper = ({ children, requiredRole }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && userRole !== requiredRole) {
-    // Redirect to appropriate dashboard based on user's actual role
-    if (userRole === USER_ROLES.SUPERADMIN) {
-      return <Navigate to="/superadmin" replace />;
-    } else if (userRole === USER_ROLES.ADMIN) {
-      return <Navigate to="/admin" replace />;
-    } else {
-      return <Navigate to="/login" replace />;
-    }
+ // ✅ Allow SuperAdmin to access Admin routes
+if (requiredRole === USER_ROLES.ADMIN && userRole === USER_ROLES.SUPERADMIN) {
+  return children; // SuperAdmin can access admin routes
+}
+
+if (requiredRole && userRole !== requiredRole) {
+  // Redirect to appropriate dashboard based on user's actual role
+  if (userRole === USER_ROLES.SUPERADMIN) {
+    return <Navigate to="/superadmin" replace />;
+  } else if (userRole === USER_ROLES.ADMIN) {
+    return <Navigate to="/admin" replace />;
+  } else {
+    return <Navigate to="/login" replace />;
   }
+}
+
 
   return children;
 };
