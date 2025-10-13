@@ -14,7 +14,7 @@ export const API_ENDPOINTS = {
   GET_API_KEY: `${BASE_URL}/get`,
   
   // ============ MERCHANT PAYMENT ENDPOINTS (JWT Auth) ============
-  TRANSACTIONS: `${BASE_URL}/payments/merchant/transactions`,
+  TRANSACTIONS: `${BASE_URL}/payments/transactions`,
   TRANSACTION_DETAIL: (transactionId) => `${BASE_URL}/payments/merchant/transactions/${transactionId}`,
   PAYOUTS: `${BASE_URL}/payments/merchant/payouts`,
   PAYOUT_REQUEST: `${BASE_URL}/payments/merchant/payout/request`,
