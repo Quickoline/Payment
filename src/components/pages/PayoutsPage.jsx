@@ -367,6 +367,18 @@ const PayoutsPage = () => {
                   </div>
                 </div>
               </div>
+{/* Free Payouts Banner - ADD THIS */}
+{balance?.merchant?.freePayoutsRemaining !== undefined && balance.merchant.freePayoutsRemaining > 0 && (
+  <div className="free-payouts-banner">
+    <div className="banner-icon">
+      <FiDollarSign />
+    </div>
+    <div className="banner-content">
+      <strong>🎉 Free Payouts Available:</strong>{' '}
+      You have <strong>{balance.merchant.freePayoutsRemaining}</strong> free payout(s) remaining for amounts under ₹500. Commission: ₹0!
+    </div>
+  </div>
+)}
 
               {/* Unsettled Balance - Locked */}
               <div className="balance-card warning">
@@ -498,9 +510,12 @@ If any available funds are not withdrawn via payout, they will automatically be 
           )}
 
           {/* Commission Info */}
-          <div className="info-message">
-            <FiInfo /> <strong>Payout Charges:</strong> ₹500-₹1000: Flat ₹35.40 | Above ₹1000: 1.77% 
-          </div>
+         <div className="info-message">
+  <FiInfo /> <strong>Payout Charges:</strong> 
+  {balance?.merchant?.freePayoutsRemaining > 0 && ` Under ₹500: FREE (${balance.merchant.freePayoutsRemaining} left) | `}
+  ₹500-₹1000: Flat ₹35.40 | Above ₹1000: 1.77% 
+</div>
+
 
           {/* Eligibility Notice */}
           {!eligibility.can_request_payout && (
