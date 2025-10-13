@@ -479,10 +479,7 @@ const SuperadminDashboard = () => {
                     <div className="stat-icon">
                       <FiTrendingUp />
                     </div>
-                    <div className="stat-content">
-                      <div className="stat-label">Net Platform Revenue</div>
-                      <div className="stat-value">{formatCurrency(stats.platform.net_platform_revenue)}</div>
-                    </div>
+                     
                   </div>
                 </div>
               </div>

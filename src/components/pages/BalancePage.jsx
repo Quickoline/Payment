@@ -162,6 +162,18 @@ const BalancePage = () => {
                   </div>
                 </div>
               )}
+{/* Free Payouts Widget - ADD THIS */}
+{balance.merchant?.freePayoutsRemaining !== undefined && (
+  <div className="free-payouts-banner">
+    <div className="banner-icon">
+      <FiDollarSign />
+    </div>
+    <div className="banner-content">
+      <strong>Free Payouts Available:</strong>{' '}
+      You have <strong>{balance.merchant.freePayoutsRemaining}</strong> free payout(s) remaining for amounts under ₹500.
+    </div>
+  </div>
+)}
 
               {/* Settlement Schedule Info Card */}
               {balance.settlement_info && (
@@ -329,25 +341,35 @@ If any available funds are not withdrawn via payout, they will automatically be 
               {balance.balance?.commission_structure && (
                 <div className="commission-section">
                   <h3><FiPercent /> Commission Structure</h3>
-                  <div className="commission-cards">
-                    <div className="commission-card">
-                      <div className="commission-title">Payin Commission</div>
-                      <div className="commission-rate">3.8%</div>
-                     
-                    </div>
-                    
-                    <div className="commission-card">
-                      <div className="commission-title">Payout (₹500-₹1000)</div>
-                      <div className="commission-rate">₹30</div>
-                     
-                    </div>
-                    
-                    <div className="commission-card">
-                      <div className="commission-title">Payout (Above ₹1000)</div>
-                      <div className="commission-rate">1.50%</div>
-                      
-                    </div>
-                  </div>
+                 <div className="commission-cards">
+  <div className="commission-card">
+    <div className="commission-title">Payin Commission</div>
+    <div className="commission-rate">3.8%</div>
+    <div className="commission-note">Per successful transaction</div>
+  </div>
+  
+  {/* FREE PAYOUT CARD - ADD THIS */}
+  <div className="commission-card free">
+    <div className="commission-title">Free Payouts</div>
+    <div className="commission-rate">₹0</div>
+    <div className="commission-note">
+      {balance.merchant?.freePayoutsRemaining || 0} free payout(s) remaining (under ₹500)
+    </div>
+  </div>
+  
+  <div className="commission-card">
+    <div className="commission-title">Payout (₹500-₹1000)</div>
+    <div className="commission-rate">₹30</div>
+    <div className="commission-note">Flat fee</div>
+  </div>
+  
+  <div className="commission-card">
+    <div className="commission-title">Payout (Above ₹1000)</div>
+    <div className="commission-rate">1.50%</div>
+    <div className="commission-note">Of payout amount</div>
+  </div>
+</div>
+
                 </div>
               )}
 
