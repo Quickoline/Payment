@@ -212,7 +212,7 @@ const AdminDashboard = () => {
   const todayPayin = getTodayTransactions();
   const todayPayout = getTodayPayouts();
   const totalTransactions = dashboardStats.transactions?.summary?.total_transactions || 0;
-  const availableBalance = dashboardStats.balance?.balance.settled_net_revenue || 0;
+  const availableBalance = dashboardStats.balance?.balance.available_balance || 0;
  
   return (
     <div className="page-container with-sidebar">
