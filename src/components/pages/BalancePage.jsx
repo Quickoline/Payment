@@ -89,9 +89,9 @@ const BalancePage = () => {
                     <FiDollarSign />
                   </div>
                   <div className="balance-content">
-                    <div className="balance-label">Available Balance (Settled)</div>
+                    <div className="balance-label">Available Wallet Balance</div>
                     <div className="balance-amount">
-                      {formatCurrency(balance.balance?.available_balance || 0)}
+                      {formatCurrency(balance.balance?.available_wallet_balance || 0)}
                     </div>
                     <div className="balance-description">
                       ✓ Ready to withdraw
@@ -107,353 +107,46 @@ const BalancePage = () => {
                   <div className="balance-content">
                     <div className="balance-label">Unsettled Balance</div>
                     <div className="balance-amount">
-                      {formatCurrency(balance.balance?.unsettled_net_revenue )}
+                      {formatCurrency(balance.balance?.unsettled_balance || 0)}
                     </div>
                     <div className="balance-description">
-                      ⏳ {balance.settlement_info?.next_settlement || 'Settling soon'}
+                      ⏳ Waiting for settlement
                     </div>
                   </div>
                 </div>
 
-                {/* Total Revenue */}
+                {/* Pending Payouts */}
                 <div className="balance-card secondary">
                   <div className="balance-icon">
                     <FiTrendingUp />
                   </div>
                   <div className="balance-content">
-                    <div className="balance-label">Total Revenue</div>
+                    <div className="balance-label">Pending Payouts</div>
                     <div className="balance-amount">
-                      {formatCurrency(balance.balance?.total_revenue || 0)}
+                      {formatCurrency(balance.balance?.pending_payouts_amount || 0)}
                     </div>
                     <div className="balance-description">
-                      Gross payments received
+                      Waiting for approval
                     </div>
                   </div>
                 </div>
 
-                {/* Commission Deducted */}
+                {/* Total Paid Out */}
                 <div className="balance-card quaternary">
                   <div className="balance-icon">
                     <FiPercent />
                   </div>
                   <div className="balance-content">
-                    <div className="balance-label">Total Commission</div>
+                    <div className="balance-label">Total Paid Out</div>
                     <div className="balance-amount">
-                      {formatCurrency(balance.balance?.total_commission || 0)}
+                      {formatCurrency(balance.balance?.total_paid_out || 0)}
                     </div>
                     <div className="balance-description">
-                      Gateway charges
+                      Successfully paid out
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Settlement Info Banner */}
-              {balance.settlement_info?.unsettled_transactions > 0 && (
-                <div className="settlement-info-banner">
-                  <div className="banner-icon">
-                    <FiInfo />
-                  </div>
-                  <div className="banner-content">
-                    <strong>Settlement Notice (T+1/2):</strong>{' '}
-                    {balance.settlement_info.unsettled_transactions} transaction(s) worth{' '}
-                    <strong>{formatCurrency(balance.balance.unsettled_net_revenue)}</strong>{' '}
-                    will be available for payout {balance.settlement_info.next_settlement_status}.
-                  </div>
-                </div>
-              )}
-{/* Free Payouts Widget - ADD THIS */}
-{balance.merchant?.freePayoutsRemaining !== undefined && (
-  <div className="free-payouts-banner">
-    <div className="banner-icon">
-      <FiDollarSign />
-    </div>
-    <div className="banner-content">
-      <strong>Free Payouts Available:</strong>{' '}
-      You have <strong>{balance.merchant.freePayoutsRemaining}</strong> free payout(s) remaining for amounts under ₹500.
-    </div>
-  </div>
-)}
-
-              {/* Settlement Schedule Info Card */}
-              {balance.settlement_info && (
-                <div className="settlement-section">
-                  <h3><FiClock /> Settlement Information - T+1/2 Policy</h3>
-                  <div className="settlement-card">
-                    <div className="settlement-stats">
-                      <div className="stat-item">
-                        <div className="stat-label">Settled Transactions</div>
-                        <div className="stat-value success">
-                          {balance.settlement_info.settled_transactions || 0}
-                        </div>
-                      </div>
-                      <div className="stat-item">
-                        <div className="stat-label">Unsettled Transactions</div>
-                        <div className="stat-value warning">
-                          {balance.settlement_info.unsettled_transactions || 0}
-                        </div>
-                      </div>
-                      <div className="stat-item">
-                        <div className="stat-label">Next Settlement</div>
-                        <div className="stat-value info">
-                          {balance.settlement_info.next_settlement || 'N/A'}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="settlement-policy">
-                      <p><strong>Settlement Policy:</strong> {'T+1/2 settlement'}</p>
-                      <p><strong>Weekend Policy:</strong> {'Saturday and Sunday are off. Weekend payments settle on Monday.'}</p>
-                    </div>
-
-                  
-                      <div className="settlement-examples">
-                        
-                        Once you request a payout, the amount will typically start reflecting in your bank the same day.
-However, due to bank processing delays or if the amount exceeds ₹2 lakh, it may take 24–48 hours to appear in your account, as per bank policies.
-Please ensure you provide the correct bank account details for smooth processing.
-
-
-If any available funds are not withdrawn via payout, they will automatically be settled to the provided bank account.
-                      </div>
-                   
-                  </div>
-                </div>
-              )}
-
-              {/* Detailed Breakdown */}
-              <div className="breakdown-section">
-                <h3><FiInfo /> Revenue Breakdown</h3>
-                <div className="breakdown-card">
-                  {/* Settled Revenue Section */}
-                  <div className="breakdown-subsection">
-                    <div className="subsection-title">✅ Settled Revenue (Available)</div>
-                    
-                    <div className="breakdown-row">
-                      <span className="breakdown-label">Settled Revenue:</span>
-                      <span className="breakdown-value">
-                        {formatCurrency(balance.balance?.settled_revenue || 0)}
-                      </span>
-                    </div>
-                    
-                    <div className="breakdown-row negative">
-                      <span className="breakdown-label">Settled Commission:</span>
-                      <span className="breakdown-value">
-                        - {formatCurrency(balance.balance?.settled_commission || 0)}
-                      </span>
-                    </div>
-                    
-                    <div className="breakdown-row">
-                      <span className="breakdown-label">Settled Net Revenue:</span>
-                      <span className="breakdown-value success">
-                        {formatCurrency(balance.balance?.settled_net_revenue || 0)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="breakdown-divider"></div>
-
-                  {/* Unsettled Revenue Section */}
-                  <div className="breakdown-subsection">
-                    <div className="subsection-title">⏳ Unsettled Revenue (Locked - {balance.settlement_info?.next_settlement_status || 'Settling soon'})</div>
-                    
-                    <div className="breakdown-row">
-                      <span className="breakdown-label">Unsettled Revenue:</span>
-                      <span className="breakdown-value">
-                        {formatCurrency(balance.balance?.unsettled_revenue || 0)}
-                      </span>
-                    </div>
-                    
-                    <div className="breakdown-row negative">
-                      <span className="breakdown-label">Unsettled Commission:</span>
-                      <span className="breakdown-value">
-                        - {formatCurrency(balance.balance?.unsettled_commission || 0)}
-                      </span>
-                    </div>
-                    
-                    <div className="breakdown-row">
-                      <span className="breakdown-label">Unsettled Net Revenue:</span>
-                      <span className="breakdown-value warning">
-                        {formatCurrency(balance.balance?.unsettled_net_revenue || 0)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="breakdown-divider"></div>
-
-                  {/* Total Section */}
-                  <div className="breakdown-row">
-                    <span className="breakdown-label">Total Revenue:</span>
-                    <span className="breakdown-value">
-                      {formatCurrency(balance.balance?.total_revenue || 0)}
-                    </span>
-                  </div>
-                  
-                  <div className="breakdown-row negative">
-                    <span className="breakdown-label">Total Refunded:</span>
-                    <span className="breakdown-value">
-                      - {formatCurrency(balance.balance?.total_refunded || 0)}
-                    </span>
-                  </div>
-                  
-                  <div className="breakdown-row negative highlight">
-                    <span className="breakdown-label">Total Commission:</span>
-                    <span className="breakdown-value">
-                      - {formatCurrency(balance.balance?.total_commission || 0)}
-                    </span>
-                  </div>
-                  
-                  <div className="breakdown-divider"></div>
-                  
-                  <div className="breakdown-row">
-                    <span className="breakdown-label">Net Revenue:</span>
-                    <span className="breakdown-value success">
-                      {formatCurrency(balance.balance?.net_revenue || 0)}
-                    </span>
-                  </div>
-                  
-                  <div className="breakdown-row negative">
-                    <span className="breakdown-label">Total Paid Out:</span>
-                    <span className="breakdown-value">
-                      - {formatCurrency(balance.balance?.total_paid_out || 0)}
-                    </span>
-                  </div>
-                  
-                  <div className="breakdown-row negative">
-                    <span className="breakdown-label">Pending Payouts:</span>
-                    <span className="breakdown-value">
-                      - {formatCurrency(balance.balance?.pending_payouts || 0)}
-                    </span>
-                  </div>
-                  
-                  <div className="breakdown-divider"></div>
-                  
-                  <div className="breakdown-row total">
-                    <span className="breakdown-label">💰 Available Balance (Settled Only):</span>
-                    <span className="breakdown-value primary">
-                      {formatCurrency(balance.balance?.available_balance || 0)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Commission Structure */}
-              {balance.balance?.commission_structure && (
-                <div className="commission-section">
-                  <h3><FiPercent /> Commission Structure</h3>
-                 <div className="commission-cards">
-  <div className="commission-card">
-    <div className="commission-title">Payin Commission</div>
-    <div className="commission-rate">3.8%</div>
-    <div className="commission-note">Per successful transaction</div>
-  </div>
-  
-  {/* FREE PAYOUT CARD - ADD THIS */}
-  <div className="commission-card free">
-    <div className="commission-title">Free Payouts</div>
-    <div className="commission-rate">₹0</div>
-    <div className="commission-note">
-      {balance.merchant?.freePayoutsRemaining || 0} free payout(s) remaining (under ₹500)
-    </div>
-  </div>
-  
-  <div className="commission-card">
-    <div className="commission-title">Payout (₹500-₹1000)</div>
-    <div className="commission-rate">₹30</div>
-    <div className="commission-note">Flat fee</div>
-  </div>
-  
-  <div className="commission-card">
-    <div className="commission-title">Payout (Above ₹1000)</div>
-    <div className="commission-rate">1.50%</div>
-    <div className="commission-note">Of payout amount</div>
-  </div>
-</div>
-
-                </div>
-              )}
-
-              {/* Transaction Summary */}
-              {balance.transaction_summary && (
-                <div className="summary-section">
-                  <h3><FiTrendingUp /> Transaction Summary</h3>
-                  <div className="details-grid">
-                    <div className="detail-card">
-                      <div className="detail-icon">
-                        <FiCreditCard />
-                      </div>
-                      <div className="detail-content">
-                        <div className="detail-label">Total Transactions</div>
-                        <div className="detail-value">
-                          {balance.transaction_summary.total_transactions || 0}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="detail-card">
-                      <div className="detail-icon success">
-                        <FiCheck />
-                      </div>
-                      <div className="detail-content">
-                        <div className="detail-label">Settled Transactions</div>
-                        <div className="detail-value">
-                          {balance.transaction_summary.settled_transactions || 0}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="detail-card">
-                      <div className="detail-icon warning">
-                        <FiClock />
-                      </div>
-                      <div className="detail-content">
-                        <div className="detail-label">Unsettled Transactions</div>
-                        <div className="detail-value">
-                          {balance.transaction_summary.unsettled_transactions || 0}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="detail-card">
-                      <div className="detail-icon">
-                        <FiTrendingUp />
-                      </div>
-                      <div className="detail-content">
-                        <div className="detail-label">Completed Payouts</div>
-                        <div className="detail-value">
-                          {balance.transaction_summary.total_payouts_completed || 0}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="detail-card">
-                      <div className="detail-icon">
-                        <HiOutlineChartBar />
-                      </div>
-                      <div className="detail-content">
-                        <div className="detail-label">Pending Payout Requests</div>
-                        <div className="detail-value">
-                          {balance.transaction_summary.pending_payout_requests || 0}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {balance.transaction_summary.avg_commission_per_transaction && (
-                      <div className="detail-card">
-                        <div className="detail-icon">
-                          <FiPercent />
-                        </div>
-                        <div className="detail-content">
-                          <div className="detail-label">Avg Commission/Txn</div>
-                          <div className="detail-value">
-                            {formatCurrency(balance.transaction_summary.avg_commission_per_transaction)}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {/* Payout Eligibility */}
               {balance.payout_eligibility && (
@@ -467,20 +160,14 @@ If any available funds are not withdrawn via payout, they will automatically be 
                     </div>
                     <div className="eligibility-details">
                       <div className="eligibility-item">
-                        <span className="eligibility-label">Available for Payout:</span>
-                        <span className="eligibility-value">
-                          {formatCurrency(balance.payout_eligibility.available_for_payout || 0)}
-                        </span>
-                      </div>
-                      <div className="eligibility-item">
-                        <span className="eligibility-label">Maximum Amount:</span>
+                        <span className="eligibility-label">Maximum Payout Amount:</span>
                         <span className="eligibility-value">
                           {formatCurrency(balance.payout_eligibility.maximum_payout_amount || 0)}
                         </span>
                       </div>
                     </div>
                     <div className="eligibility-reason">
-                      <FiInfo /> {balance.payout_eligibility.reason || 'Settlement status determines payout availability'}
+                      <FiInfo /> {balance.payout_eligibility.can_request_payout ? 'You can request a payout from your available wallet balance.' : 'You do not have any available balance for payout.'}
                     </div>
                   </div>
                 </div>

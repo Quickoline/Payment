@@ -228,12 +228,7 @@ class PaymentService {
       },
     });
 
-    const api = response.data || {};
-    const bal = api || {};
-    
-  
-
-    return bal;
+    return response.data;
   } catch (error) {
     console.error('Balance fetch error:', error);
     throw new Error(this.getApiErrorMessage(error, 'Failed to fetch balance'));

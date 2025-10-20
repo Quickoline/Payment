@@ -30,10 +30,43 @@ const SuperadminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+const [loadingSettlement, setLoadingSettlement] = useState(false);
+const [settlementMessage, setSettlementMessage] = useState('');
 
   useEffect(() => {
     fetchStats();
   }, []);
+const handleManualSettlement = async () => {
+  if (!window.confirm('Are you sure you want to run manual settlement? This will process all eligible transactions.')) {
+    return;
+  }
+
+  setLoadingSettlement(true);
+  setSettlementMessage('');
+  
+  try {
+    const result = await superadminPaymentService.triggerManualSettlement();
+    
+    if (result.success) {
+      setSettlementMessage('✅ Manual settlement completed successfully!');
+      // Refresh dashboard stats to show updated numbers
+      setTimeout(() => {
+        fetchStats();
+      }, 1000);
+    } else {
+      setSettlementMessage(`❌ Settlement failed: ${result.message}`);
+    }
+  } catch (err) {
+    console.error('Manual settlement error:', err);
+    setSettlementMessage(`❌ Error: ${err.message}`);
+  } finally {
+    setLoadingSettlement(false);
+    // Clear message after 5 seconds
+    setTimeout(() => {
+      setSettlementMessage('');
+    }, 5000);
+  }
+};
 
   const fetchStats = async () => {
     setLoading(true);
@@ -385,55 +418,79 @@ const SuperadminDashboard = () => {
               </div>
 
               {/* Settlement Section */}
-              <div className="stats-section">
-                <div className="section-header">
-                  <h2><FiPackage /> Settlement Status</h2>
-                </div>
-                <div className="stats-grid">
-                  <div className="stat-card success">
-                    <div className="stat-icon">
-                      <FiCheckCircle />
-                    </div>
-                    <div className="stat-content">
-                      <div className="stat-label">Settled Transactions</div>
-                      <div className="stat-value">{formatNumber(stats.settlement.settled_transactions)}</div>
-                    </div>
-                  </div>
+              {/* Settlement Section */}
+<div className="stats-section">
+  <div className="section-header">
+    <h2><FiPackage /> Settlement Status</h2>
+    <button 
+      onClick={handleManualSettlement} 
+      disabled={loadingSettlement}
+      className="btn-primary"
+      style={{ 
+        padding: '8px 16px', 
+        borderRadius: '6px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      }}
+    >
+      <FiRefreshCw className={loadingSettlement ? 'spinning' : ''} />
+      {loadingSettlement ? 'Processing...' : 'Run Manual Settlement'}
+    </button>
+  </div>
 
-                  <div className="stat-card warning">
-                    <div className="stat-icon">
-                      <FiClock />
-                    </div>
-                    <div className="stat-content">
-                      <div className="stat-label">Unsettled</div>
-                      <div className="stat-value">{formatNumber(stats.settlement.unsettled_transactions)}</div>
-                    </div>
-                  </div>
+  {settlementMessage && (
+    <div className={`alert ${settlementMessage.includes('✅') ? 'success' : 'error'}`}>
+      {settlementMessage}
+    </div>
+  )}
 
-                  <div className="stat-card info">
-                    <div className="stat-icon">
-                      <FiDollarSign />
-                    </div>
-                    <div className="stat-content">
-                      <div className="stat-label">Available for Payout</div>
-                      <div className="stat-value">{formatNumber(stats.settlement.available_for_payout)}</div>
-                      <div className="stat-meta">
-                        {formatCurrency(stats.settlement.available_balance)}
-                      </div>
-                    </div>
-                  </div>
+  <div className="stats-grid">
+    <div className="stat-card success">
+      <div className="stat-icon">
+        <FiCheckCircle />
+      </div>
+      <div className="stat-content">
+        <div className="stat-label">Settled Transactions</div>
+        <div className="stat-value">{formatNumber(stats.settlement.settled_transactions)}</div>
+      </div>
+    </div>
 
-                  <div className="stat-card tertiary">
-                    <div className="stat-icon">
-                      <FiPackage />
-                    </div>
-                    <div className="stat-content">
-                      <div className="stat-label">In Payouts</div>
-                      <div className="stat-value">{formatNumber(stats.settlement.in_payouts)}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <div className="stat-card warning">
+      <div className="stat-icon">
+        <FiClock />
+      </div>
+      <div className="stat-content">
+        <div className="stat-label">Unsettled</div>
+        <div className="stat-value">{formatNumber(stats.settlement.unsettled_transactions)}</div>
+      </div>
+    </div>
+
+    <div className="stat-card info">
+      <div className="stat-icon">
+        <FiDollarSign />
+      </div>
+      <div className="stat-content">
+        <div className="stat-label">Available for Payout</div>
+        <div className="stat-value">{formatNumber(stats.settlement.available_for_payout)}</div>
+        <div className="stat-meta">
+          {formatCurrency(stats.settlement.available_balance)}
+        </div>
+      </div>
+    </div>
+
+    <div className="stat-card tertiary">
+      <div className="stat-icon">
+        <FiPackage />
+      </div>
+      <div className="stat-content">
+        <div className="stat-label">In Payouts</div>
+        <div className="stat-value">{formatNumber(stats.settlement.in_payouts)}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
               {/* Platform Revenue */}
               <div className="stats-section">

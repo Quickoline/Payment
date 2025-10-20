@@ -212,7 +212,7 @@ const AdminDashboard = () => {
   const todayPayin = getTodayTransactions();
   const todayPayout = getTodayPayouts();
   const totalTransactions = dashboardStats.transactions?.summary?.total_transactions || 0;
-  const availableBalance = dashboardStats.balance?.balance.available_balance || 0;
+   const availableBalance = dashboardStats.balance?.balance.available_balance || 0;
  
   return (
     <div className="page-container with-sidebar">
@@ -284,7 +284,7 @@ const AdminDashboard = () => {
               <div className="card-content">
                 <div className="metric-label">Available Balance</div>
                 <div className="metric-value">
-                  {dashboardStats.loading ? '...' : formatCurrency(availableBalance)}
+                  {dashboardStats.balance?.balance.available_balance}
                 </div>
                 <div className="metric-sub">Ready to withdraw</div>
               </div>

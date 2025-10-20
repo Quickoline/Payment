@@ -32,7 +32,8 @@ export const API_ENDPOINTS = {
   
   // ============ REFUND (Not implemented yet) ============
   REFUND: (orderId) => `${BASE_URL}/payments/refund/${orderId}`,
-  
+    MANUAL_SETTLEMENT: `${BASE_URL}/superadmin/manual-settlement`,
+
   // ============ WEBHOOK CONFIGURATION ============
   WEBHOOK_CONFIGURE: `${BASE_URL}/payments/merchant/webhook/configure`,
   WEBHOOK_CONFIG: `${BASE_URL}/payments/merchant/webhook/config`,

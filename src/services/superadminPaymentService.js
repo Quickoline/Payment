@@ -30,6 +30,34 @@ class SuperadminPaymentService {
       this.handleError(error, 'Failed to fetch dashboard statistics');
     }
   }
+// ============ MANUAL SETTLEMENT ============
+async triggerManualSettlement() {
+  try {
+    const token = authService.getToken();
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    console.log('Triggering manual settlement:', API_ENDPOINTS.MANUAL_SETTLEMENT);
+
+    const response = await axios.post(
+      API_ENDPOINTS.MANUAL_SETTLEMENT,
+      {},
+      {
+        headers: {
+          'x-auth-token': token,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    console.log('Manual settlement response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Manual settlement error:', error);
+    this.handleError(error, 'Failed to trigger manual settlement');
+  }
+}
 
   // ============ TRANSACTIONS ============
   async getAdminTransactions(filters = {}) {

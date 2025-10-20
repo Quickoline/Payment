@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 
 const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
+  const [payouts, setPayouts] = useState([]); // ✅ ADD THIS
+
   const [pagination, setPagination] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -38,28 +40,33 @@ const TransactionsPage = () => {
     setError('');
 
     try {
-      // Determine status filter based on active tab
-      let statusFilter = '';
       if (activeTab === 'payin') {
-        statusFilter = 'paid'; // Only show paid transactions for payin
+        // ✅ Fetch transactions (payments received)
+        const data = await paymentService.getTransactions({
+          ...filters,
+          status: filters.status || '' // Show all statuses
+        });
+        setTransactions(data.transactions || []);
+        setPagination(data.pagination || {});
       } else if (activeTab === 'payout') {
-        statusFilter = 'pending,refunded,failed,partial_refund'; // Show payout statuses
+        // ✅ Fetch payouts (withdrawals)
+        const data = await paymentService.getPayouts({
+          page: filters.page,
+          limit: filters.limit,
+          status: filters.status || '',
+          startDate: filters.start_date,
+          endDate: filters.end_date
+        });
+        setPayouts(data.payouts || []);
+        setPagination(data.pagination || {});
       }
-
-      const updatedFilters = {
-        ...filters,
-        status: statusFilter
-      };
-
-      const data = await paymentService.getTransactions(updatedFilters);
-      setTransactions(data.transactions || []);
-      setPagination(data.pagination || {});
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({
@@ -256,15 +263,15 @@ const TransactionsPage = () => {
           </div>
 
           {error && <div className="error-message">{error}</div>}
-
           {loading ? (
             <div className="loading-state">
               <div className="loading-spinner"></div>
-              <p>Loading transactions...</p>
+              <p>Loading {activeTab === 'payin' ? 'transactions' : 'payouts'}...</p>
             </div>
           ) : (
             <div className="transactions-container">
-              {transactions.length > 0 ? (
+              {/* ✅ PAYIN TAB - Show Transactions */}
+              {activeTab === 'payin' && transactions.length > 0 ? (
                 <div className="table-card">
                   <table className="tx-table">
                     <thead>
@@ -276,9 +283,8 @@ const TransactionsPage = () => {
                         <th>Status</th>
                         <th>Payment Method</th>
                         <th>Gateway</th>
-                        <th>Updated At</th>
+                        <th>Created At</th>
                         <th>Paid At</th>
-                        <th>Description</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -288,12 +294,12 @@ const TransactionsPage = () => {
                           className="clickable-row"
                           onClick={() => navigate(`/admin/transactions/${transaction.transaction_id}`)}
                           style={{ cursor: 'pointer' }}
-                        >                          <td className="transaction-id">{transaction.transaction_id || '-'}</td>
+                        >
+                          <td className="transaction-id">{transaction.transaction_id || '-'}</td>
                           <td className="order-id">{transaction.order_id || '-'}</td>
                           <td className="customer-info">
                             <div className="customer-name">{transaction.customer_name || '-'}</div>
                             <div className="customer-email">{transaction.customer_email || '-'}</div>
-                            <div className="customer-phone">{transaction.customer_phone || '-'}</div>
                           </td>
                           <td className="amount">{formatAmount(transaction.amount)}</td>
                           <td>
@@ -303,23 +309,70 @@ const TransactionsPage = () => {
                           </td>
                           <td className="payment-method">{transaction.payment_method || '-'}</td>
                           <td className="gateway">{transaction.payment_gateway || '-'}</td>
-                          <td className="date">{formatDate(transaction.updated_at || transaction.created_at)}</td>
+                          <td className="date">{formatDate(transaction.created_at)}</td>
                           <td className="date">{formatDate(transaction.paid_at)}</td>
-                          <td className="description">{transaction.description || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              ) : (
+              ) : activeTab === 'payin' && transactions.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-icon"><HiOutlineClipboardDocumentList /></div>
                   <h3>No Transactions Found</h3>
                   <p>No transactions match your current filters.</p>
                 </div>
-              )}
+              ) : null}
 
-              {/* Pagination */}
+              {/* ✅ PAYOUT TAB - Show Payouts */}
+              {activeTab === 'payout' && payouts.length > 0 ? (
+                <div className="table-card">
+                  <table className="tx-table">
+                    <thead>
+                      <tr>
+                        <th>Payout ID</th>
+                        <th>Amount</th>
+                        <th>Net Amount</th>
+                        <th>Commission</th>
+                        <th>Status</th>
+                        <th>Transfer Mode</th>
+                        <th>Requested At</th>
+                        <th>Completed At</th>
+                        <th>UTR</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {payouts.map((payout, index) => (
+                        <tr key={payout.payoutId || index}>
+                          <td className="transaction-id">{payout.payoutId || '-'}</td>
+                          <td className="amount">{formatAmount(payout.amount)}</td>
+                          <td className="amount" style={{ color: '#10b981', fontWeight: 600 }}>
+                            {formatAmount(payout.netAmount)}
+                          </td>
+                          <td className="amount">{formatAmount(payout.commission)}</td>
+                          <td>
+                            <span className={`transaction-status ${getStatusClass(payout.status)}`}>
+                              {payout.status || 'Pending'}
+                            </span>
+                          </td>
+                          <td>{payout.transferMode === 'bank_transfer' ? 'Bank Transfer' : 'UPI'}</td>
+                          <td className="date">{formatDate(payout.requestedAt)}</td>
+                          <td className="date">{formatDate(payout.completedAt)}</td>
+                          <td>{payout.utr || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : activeTab === 'payout' && payouts.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-icon"><HiOutlineClipboardDocumentList /></div>
+                  <h3>No Payouts Found</h3>
+                  <p>No payout requests match your current filters.</p>
+                </div>
+              ) : null}
+
+              {/* Pagination - same for both tabs */}
               {pagination && Object.keys(pagination).length > 0 && (
                 <div className="pagination">
                   <div className="pagination-info">
@@ -348,6 +401,7 @@ const TransactionsPage = () => {
               )}
             </div>
           )}
+
         </div>
       </main>
     </div>
