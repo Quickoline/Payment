@@ -30,6 +30,36 @@
   padding: 2rem 1rem;
   position: relative;
 }
+/* Monospace for IDs and references */
+.txd-mono {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Success/Warning badges for settlement */
+.txd-badge-success {
+  color: #065f46;
+  background: #d1fae5;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.txd-badge-warning {
+  color: #92400e;
+  background: #fef3c7;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
 
 /* Container */
 .txd-container {

@@ -48,15 +48,18 @@ const TransactionDetailPage = () => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const getStatusConfig = (status) => {
-    const configs = {
-      paid: { icon: FiCheckCircle, color: '#10b981', bg: '#d1fae5', label: 'PAID' },
-      failed: { icon: FiXCircle, color: '#ef4444', bg: '#fee2e2', label: 'FAILED' },
-      pending: { icon: FiClock, color: '#f59e0b', bg: '#fef3c7', label: 'PENDING' }
-    };
-    return configs[status?.toLowerCase()] || configs.pending;
+const getStatusConfig = (status) => {
+  const configs = {
+    paid: { icon: FiCheckCircle, color: '#10b981', bg: '#d1fae5', label: 'PAID' },
+    failed: { icon: FiXCircle, color: '#ef4444', bg: '#fee2e2', label: 'FAILED' },
+    pending: { icon: FiClock, color: '#f59e0b', bg: '#fef3c7', label: 'PENDING' },
+    created: { icon: FiClock, color: '#3b82f6', bg: '#dbeafe', label: 'CREATED' }, // ✅ ADD
+    cancelled: { icon: FiXCircle, color: '#64748b', bg: '#f1f5f9', label: 'CANCELLED' }, // ✅ ADD
+    expired: { icon: FiXCircle, color: '#94a3b8', bg: '#f8fafc', label: 'EXPIRED' } // ✅ ADD
   };
+  return configs[status?.toLowerCase()] || configs.pending;
+};
+
 
   function formatDate(dateStr) {
     if (!dateStr) return '-';
@@ -254,7 +257,65 @@ const TransactionDetailPage = () => {
       
       yPos = doc.lastAutoTable.finalY + 15;
     }
+    // Payment References (UTR, Bank Details)
+if (transaction.utr || transaction.acquirerData?.utr || transaction.bank_transaction_id) {
+  doc.setFontSize(14);
+  doc.setTextColor(...textPrimary);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Payment References', 20, yPos);
+  
+  yPos += 10;
+  
+  const paymentRefData = [];
+  if (transaction.utr || transaction.acquirerData?.utr || transaction.acquirerData?.rrn) {
+    paymentRefData.push(['UTR/RRN', transaction.utr || transaction.acquirerData?.utr || transaction.acquirerData?.rrn]);
+  }
+  if (transaction.bank_transaction_id || transaction.acquirerData?.bank_transaction_id) {
+    paymentRefData.push(['Bank Transaction ID', transaction.bank_transaction_id || transaction.acquirerData?.bank_transaction_id]);
+  }
+  if (transaction.acquirerData?.auth_code) {
+    paymentRefData.push(['Auth Code', transaction.acquirerData.auth_code]);
+  }
+  if (transaction.acquirerData?.card_last4) {
+    paymentRefData.push(['Card', `**** **** **** ${transaction.acquirerData.card_last4}${transaction.acquirerData.card_network ? ` (${transaction.acquirerData.card_network})` : ''}`]);
+  }
+  if (transaction.acquirerData?.bank_name) {
+    paymentRefData.push(['Bank Name', transaction.acquirerData.bank_name]);
+  }
+  if (transaction.acquirerData?.vpa) {
+    paymentRefData.push(['UPI ID', transaction.acquirerData.vpa]);
+  }
+  
+  if (paymentRefData.length > 0) {
+    autoTable(doc, {
+      startY: yPos,
+      head: [],
+      body: paymentRefData,
+      theme: 'plain',
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+        textColor: textPrimary,
+      },
+      columnStyles: {
+        0: { 
+          fontStyle: 'bold', 
+          textColor: textSecondary,
+          cellWidth: 60 
+        },
+        1: { 
+          fontStyle: 'normal',
+          textColor: textPrimary,
+          font: 'courier'
+        }
+      },
+      margin: { left: 20, right: 20 }
+    });
     
+    yPos = doc.lastAutoTable.finalY + 15;
+  }
+}
+
     // Gateway Reference IDs
     if (transaction.razorpayPaymentId || transaction.razorpayOrderId) {
       // Add new page if needed
@@ -431,6 +492,69 @@ const TransactionDetailPage = () => {
               </div>
             </div>
           </div>
+{/* Payment References - UTR, Bank Details */}
+{(transaction.utr || transaction.bank_transaction_id || transaction.acquirerData) && (
+  <div className="txd-glass-card">
+    <div className="txd-card-header">
+      <FiCreditCard className="txd-card-icon" />
+      <h3>Payment References</h3>
+    </div>
+    <div className="txd-card-body">
+      {(transaction.utr || transaction.acquirerData?.utr || transaction.acquirerData?.rrn) && (
+        <div className="txd-row">
+          <span className="txd-label">UTR/RRN</span>
+          <span className="txd-value txd-mono">
+            {transaction.utr || transaction.acquirerData?.utr || transaction.acquirerData?.rrn || '-'}
+          </span>
+        </div>
+      )}
+      
+      {(transaction.bank_transaction_id || transaction.acquirerData?.bank_transaction_id) && (
+        <div className="txd-row">
+          <span className="txd-label">Bank Txn ID</span>
+          <span className="txd-value txd-mono">
+            {transaction.bank_transaction_id || transaction.acquirerData?.bank_transaction_id || '-'}
+          </span>
+        </div>
+      )}
+      
+      {transaction.acquirerData?.auth_code && (
+        <div className="txd-row">
+          <span className="txd-label">Auth Code</span>
+          <span className="txd-value txd-mono">{transaction.acquirerData.auth_code}</span>
+        </div>
+      )}
+      
+      {transaction.acquirerData?.card_last4 && (
+        <div className="txd-row">
+          <span className="txd-label">Card</span>
+          <span className="txd-value">
+            **** **** **** {transaction.acquirerData.card_last4} 
+            {transaction.acquirerData.card_network && (
+              <span className="txd-badge" style={{ marginLeft: '8px' }}>
+                {transaction.acquirerData.card_network}
+              </span>
+            )}
+          </span>
+        </div>
+      )}
+      
+      {transaction.acquirerData?.bank_name && (
+        <div className="txd-row">
+          <span className="txd-label">Bank</span>
+          <span className="txd-value">{transaction.acquirerData.bank_name}</span>
+        </div>
+      )}
+      
+      {transaction.acquirerData?.vpa && (
+        <div className="txd-row">
+          <span className="txd-label">UPI ID</span>
+          <span className="txd-value txd-mono">{transaction.acquirerData.vpa}</span>
+        </div>
+      )}
+    </div>
+  </div>
+)}
 
           {/* Customer Info */}
           <div className="txd-glass-card">
@@ -492,26 +616,38 @@ const TransactionDetailPage = () => {
           </div>
 
           {/* Settlement Info */}
-          <div className="txd-glass-card">
-            <div className="txd-card-header">
-              <FiCreditCard className="txd-card-icon" />
-              <h3>Settlement</h3>
-            </div>
-            <div className="txd-card-body">
-              <div className="txd-row">
-                <span className="txd-label">Status</span>
-                <span className="txd-value">{transaction.settlementStatus || 'Pending'}</span>
-              </div>
-              <div className="txd-row">
-                <span className="txd-label">Expected</span>
-                <span className="txd-value">{formatDate(transaction.expectedSettlementDate)}</span>
-              </div>
-              <div className="txd-row">
-                <span className="txd-label">Settled</span>
-                <span className="txd-value">{formatDate(transaction.settlementDate)}</span>
-              </div>
-            </div>
-          </div>
+        {/* Settlement Info */}
+<div className="txd-glass-card">
+  <div className="txd-card-header">
+    <FiCreditCard className="txd-card-icon" />
+    <h3>Settlement</h3>
+  </div>
+  <div className="txd-card-body">
+    <div className="txd-row">
+      <span className="txd-label">Status</span>
+      <span className={`txd-value ${transaction.settlementStatus === 'settled' ? 'txd-badge-success' : 'txd-badge-warning'}`}>
+        {transaction.settlementStatus || 'unsettled'}
+      </span>
+    </div>
+    <div className="txd-row">
+      <span className="txd-label">Expected</span>
+      <span className="txd-value">{formatDate(transaction.expectedSettlementDate)}</span>
+    </div>
+    {transaction.settlementDate && (
+      <div className="txd-row">
+        <span className="txd-label">Settled On</span>
+        <span className="txd-value txd-badge-success">{formatDate(transaction.settlementDate)}</span>
+      </div>
+    )}
+    {transaction.payoutStatus && (
+      <div className="txd-row">
+        <span className="txd-label">Payout Status</span>
+        <span className="txd-value">{transaction.payoutStatus}</span>
+      </div>
+    )}
+  </div>
+</div>
+
         </div>
 
         {/* Gateway Details */}

@@ -34,6 +34,30 @@ const PayoutSection = () => {
     notes: ''
   });
 
+  const [balance, setBalance] = useState(null);
+  const [eligibility, setEligibility] = useState({
+    can_request_payout: false,
+    maximum_payout_amount: 0,
+  });
+
+  useEffect(() => {
+    loadEligibility();
+  }, []);
+
+  const loadEligibility = async () => {
+    try {
+      const bal = await paymentService.getBalance();
+      setBalance(bal);
+      const pe = bal.payout_eligibility || {};
+      setEligibility({
+        can_request_payout: pe.can_request_payout ?? false,
+        maximum_payout_amount: pe.maximum_payout_amount ?? 0,
+      });
+    } catch (e) {
+      console.error('Error loading eligibility:', e);
+    }
+  };
+
   useEffect(() => {
     fetchPayouts();
   }, []);
@@ -60,14 +84,18 @@ const PayoutSection = () => {
     setSuccess('');
     
     try {
-      // Validate amount
-      const amount = parseFloat(requestData.amount);
-      if (amount < 500) {
-        throw new Error('Minimum payout amount is ₹500');
-      }
-      if (amount > 100000) {
-        throw new Error('Maximum payout amount is ₹1,00,000');
-      }
+        if (!eligibility.can_request_payout) {
+            throw new Error('You are not eligible to request a payout at this time.');
+        }
+
+        const amount = parseFloat(requestData.amount);
+        if (isNaN(amount) || amount <= 0) {
+            throw new Error('Please enter a valid payout amount.');
+        }
+
+        if (amount > eligibility.maximum_payout_amount) {
+            throw new Error(`The requested amount exceeds your available balance of ${formatCurrency(eligibility.maximum_payout_amount)}.`);
+        }
 
       const payoutData = {
         amount: amount,
@@ -91,6 +119,7 @@ const PayoutSection = () => {
       setShowRequestForm(false);
       resetForm();
       fetchPayouts();
+      loadEligibility();
       
       // Clear success message after 5 seconds
       setTimeout(() => setSuccess(''), 5000);
@@ -274,10 +303,10 @@ const PayoutSection = () => {
                   value={requestData.amount}
                   onChange={(e) => handleInputChange('amount', e.target.value)}
                   required
-                  min="500"
-                  max="100000"
+                  min="1"
+                  max={eligibility.maximum_payout_amount}
                   step="0.01"
-                  placeholder="Min: ₹500, Max: ₹100,000"
+                  placeholder={`Max: ${formatCurrency(eligibility.maximum_payout_amount)}`}
                 />
                 <small className="form-hint">Minimum: ₹500 | Maximum: ₹1,00,000</small>
               </div>
