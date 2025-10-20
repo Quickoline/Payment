@@ -461,6 +461,108 @@ const PayoutsManagement = () => {
         ))}
       </tbody>
     </table>
+    <div className="mobile-payout-cards mobile-only">
+      {payouts.map((payout) => (
+        <div key={payout.payoutId} className="payout-card-mobile">
+          {/* Card Header */}
+          <div className="payout-card-header">
+            <div className="payout-id-mobile">
+              {payout.payoutId.slice(-12)}
+              <button
+                className="copy-btn-tiny"
+                onClick={() => {
+                  navigator.clipboard.writeText(payout.payoutId);
+                  setToast({ message: 'Copied!', type: 'success' });
+                }}
+              >
+                <FiCopy size={10} />
+              </button>
+            </div>
+            <span className={`status-badge-mobile ${getStatusBadgeClass(payout.status)}`}>
+              {getStatusIcon(payout.status)}
+              {payout.status}
+            </span>
+          </div>
+
+          {/* Card Body */}
+          <div className="payout-card-body">
+            {/* Merchant Info */}
+            <div className="merchant-info-mobile">
+              <div className="merchant-name-mobile">{payout.merchantName}</div>
+              <div className="merchant-email-mobile">{payout.requestedByName}</div>
+            </div>
+
+            {/* Amount */}
+            <div className="card-info-row">
+              <span className="card-label">Net Amount</span>
+              <span className="card-value amount">
+                ₹{payout.netAmount.toLocaleString('en-IN')}
+              </span>
+            </div>
+
+            {/* Transfer Mode */}
+            <div className="card-info-row">
+              <span className="card-label">Transfer Mode</span>
+              <span className="card-value">
+                {payout.transferMode === 'upi' ? '📱 UPI' : '🏦 Bank'}
+              </span>
+            </div>
+
+            {/* Requested Date */}
+            <div className="card-info-row">
+              <span className="card-label">Requested</span>
+              <span className="card-value">
+                {new Date(payout.requestedAt).toLocaleDateString('en-IN', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric'
+                })}
+              </span>
+            </div>
+          </div>
+
+          {/* Card Footer - Actions */}
+          <div className="payout-card-footer">
+            <button
+              onClick={() => openModal('view', payout)}
+              className="btn-view-mobile"
+            >
+              <FiEye size={14} />
+              View
+            </button>
+
+            {payout.status === 'requested' && (
+              <>
+                <button
+                  onClick={() => openModal('approve', payout)}
+                  className="btn-approve-mobile"
+                >
+                  <FiCheck size={14} />
+                  Approve
+                </button>
+                <button
+                  onClick={() => openModal('reject', payout)}
+                  className="btn-reject-mobile"
+                >
+                  <FiX size={14} />
+                  Reject
+                </button>
+              </>
+            )}
+
+            {(payout.status === 'pending' || payout.status === 'processing') && (
+              <button
+                onClick={() => openModal('process', payout)}
+                className="btn-process-mobile"
+              >
+                <FiSend size={14} />
+                Complete
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
   </div>
 ) : (
   <div className="empty-state">
