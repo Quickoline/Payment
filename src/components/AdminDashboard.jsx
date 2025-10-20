@@ -284,7 +284,7 @@ const AdminDashboard = () => {
               <div className="card-content">
                 <div className="metric-label">Available Balance</div>
                 <div className="metric-value">
-                  {dashboardStats.loading ? '...' : formatCurrency(availableBalance)}
+                  {dashboardStats.balance?.balance.available_balance}
                 </div>
                 <div className="metric-sub">Ready to withdraw</div>
               </div>
