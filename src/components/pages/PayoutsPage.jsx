@@ -26,18 +26,18 @@ const PayoutsPage = () => {
   const [balance, setBalance] = useState(null);
   const [loading, setLoading] = useState(false);
   const [requestData, setRequestData] = useState({
-  amount: '',
-   transferMode: 'upi',
-  beneficiaryDetails: {
-    upiId: '',
-    accountNumber: '',
-    ifscCode: '',
-    accountHolderName: '',
-    bankName: '',
-    branchName: ''
-  },
-  notes: ''
-});
+    amount: '',
+    transferMode: 'upi',
+    beneficiaryDetails: {
+      upiId: '',
+      accountNumber: '',
+      ifscCode: '',
+      accountHolderName: '',
+      bankName: '',
+      branchName: ''
+    },
+    notes: ''
+  });
 
   const [error, setError] = useState('');
   const [showRequestForm, setShowRequestForm] = useState(false);
@@ -48,7 +48,7 @@ const PayoutsPage = () => {
     minimum_payout_amount: 0,
     maximum_payout_amount: 0
   });
-  
+
   // Function to generate and download invoice PDF
   const downloadInvoicePDF = (payout) => {
     const doc = new jsPDF();
@@ -181,70 +181,70 @@ const PayoutsPage = () => {
     }));
   };
 
-const handleRequestPayout = async (e) => {
-  e.preventDefault();
-  setRequestLoading(true);
-  setError('');
-  
-  try {
-    if (!eligibility.can_request_payout) {
-      throw new Error('You are not eligible to request a payout at this time. Wait for settlement to complete.');
-    }
+  const handleRequestPayout = async (e) => {
+    e.preventDefault();
+    setRequestLoading(true);
+    setError('');
 
-    if (!requestData.amount || parseFloat(requestData.amount) <= 0) {
+    try {
+      if (!eligibility.can_request_payout) {
+        throw new Error('You are not eligible to request a payout at this time. Wait for settlement to complete.');
+      }
+
+      if (!requestData.amount || parseFloat(requestData.amount) <= 0) {
         throw new Error('Please enter a valid payout amount.');
-    }
+      }
 
-    if (parseFloat(requestData.amount) > eligibility.maximum_payout_amount) {
+      if (parseFloat(requestData.amount) > eligibility.maximum_payout_amount) {
         throw new Error(`The requested amount exceeds your available balance of ${formatCurrency(eligibility.maximum_payout_amount)}.`);
-    }
+      }
 
-    const payoutData = {
-      amount: requestData.amount,
-      transferMode: requestData.transferMode,
-      beneficiaryDetails: requestData.transferMode === 'upi' 
-        ? { upiId: requestData.beneficiaryDetails.upiId }
-        : {
+      const payoutData = {
+        amount: requestData.amount,
+        transferMode: requestData.transferMode,
+        beneficiaryDetails: requestData.transferMode === 'upi'
+          ? { upiId: requestData.beneficiaryDetails.upiId }
+          : {
             accountNumber: requestData.beneficiaryDetails.accountNumber,
             ifscCode: requestData.beneficiaryDetails.ifscCode,
             accountHolderName: requestData.beneficiaryDetails.accountHolderName,
             bankName: requestData.beneficiaryDetails.bankName,
             branchName: requestData.beneficiaryDetails.branchName
           },
-      notes: requestData.notes
-    };
-    
-    await paymentService.requestPayout(payoutData);
-    setShowRequestForm(false);
-    setToast({ message: 'Payout request submitted successfully!', type: 'success' });
-    resetForm();
-    fetchPayouts();
-    loadEligibility();
-  } catch (error) {
-    setError(error.message);
-    setToast({ message: error.message, type: 'error' });
-  } finally {
-    setRequestLoading(false);
-  }
-};
+        notes: requestData.notes
+      };
+
+      await paymentService.requestPayout(payoutData);
+      setShowRequestForm(false);
+      setToast({ message: 'Payout request submitted successfully!', type: 'success' });
+      resetForm();
+      fetchPayouts();
+      loadEligibility();
+    } catch (error) {
+      setError(error.message);
+      setToast({ message: error.message, type: 'error' });
+    } finally {
+      setRequestLoading(false);
+    }
+  };
 
 
 
- const resetForm = () => {
-  setRequestData({
-    amount: '',
-    transferMode: 'upi',
-    beneficiaryDetails: {
-      upiId: '',
-      accountNumber: '',
-      ifscCode: '',
-      accountHolderName: '',
-      bankName: '',
-      branchName: ''
-    },
-    notes: ''
-  });
-};
+  const resetForm = () => {
+    setRequestData({
+      amount: '',
+      transferMode: 'upi',
+      beneficiaryDetails: {
+        upiId: '',
+        accountNumber: '',
+        ifscCode: '',
+        accountHolderName: '',
+        bankName: '',
+        branchName: ''
+      },
+      notes: ''
+    });
+  };
 
 
 
@@ -364,7 +364,7 @@ const handleRequestPayout = async (e) => {
                 <div className="balance-content">
                   <div className="balance-label">Available Wallet Balance</div>
                   <div className="balance-amount">
-                    {formatCurrency(balance.balance?.available_wallet_balance || 0)}
+                    {formatCurrency(balance.balance?.available_balance || 0)}
                   </div>
                   <div className="balance-description">
                     ✓ Ready to withdraw
@@ -380,7 +380,7 @@ const handleRequestPayout = async (e) => {
                 <div className="balance-content">
                   <div className="balance-label">Unsettled Balance</div>
                   <div className="balance-amount">
-                    {formatCurrency(balance.balance?.unsettled_balance || 0)}
+                    {formatCurrency(balance.balance?.unsettled_revenue || 0)}
                   </div>
                   <div className="balance-description">
                     ⏳ Waiting for settlement
@@ -396,7 +396,7 @@ const handleRequestPayout = async (e) => {
                 <div className="balance-content">
                   <div className="balance-label">Pending Payouts</div>
                   <div className="balance-amount">
-                    {formatCurrency(balance.balance?.pending_payouts_amount || 0)}
+                    {formatCurrency(balance.balance?.pending_payouts || 0)}
                   </div>
                   <div className="balance-description">
                     Awaiting processing
@@ -519,155 +519,155 @@ const handleRequestPayout = async (e) => {
             </div>
           )}
 
-         {/* Request Form */}
-{showRequestForm && (
-  <div className="request-form-card">
-    <h3><FiPlus /> Request New Payout</h3>
-    <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '20px' }}>
-      Select a settlement date to withdraw all transactions settled on that day
-    </p>
-    
-    <form onSubmit={handleRequestPayout} className="payout-form">
-        <div className="form-group">
-            <label>Amount (₹) *</label>
-            <input
-                type="number"
-                value={requestData.amount}
-                onChange={(e) => handleInputChange('amount', e.target.value)}
-                required
-                placeholder={`Max: ${formatCurrency(eligibility.maximum_payout_amount)}`}
-                max={eligibility.maximum_payout_amount}
-                min="1"
-            />
-        </div>
+          {/* Request Form */}
+          {showRequestForm && (
+            <div className="request-form-card">
+              <h3><FiPlus /> Request New Payout</h3>
+              <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '20px' }}>
+                Select a settlement date to withdraw all transactions settled on that day
+              </p>
 
-      <div className="form-row">
-        <div className="form-group">
-          <label>Transfer Mode *</label>
-          <select
-            value={requestData.transferMode}
-            onChange={(e) => {
-              handleInputChange('transferMode', e.target.value);
-            }}
-          >
-            <option value="upi">UPI</option>
-            <option value="bank_transfer">Bank Transfer</option>
-          </select>
-        </div>
-      </div>
+              <form onSubmit={handleRequestPayout} className="payout-form">
+                <div className="form-group">
+                  <label>Amount (₹) *</label>
+                  <input
+                    type="number"
+                    value={requestData.amount}
+                    onChange={(e) => handleInputChange('amount', e.target.value)}
+                    required
+                    placeholder={`Max: ${formatCurrency(eligibility.maximum_payout_amount)}`}
+                    max={eligibility.maximum_payout_amount}
+                    min="1"
+                  />
+                </div>
 
-      {requestData.transferMode === 'upi' ? (
-        <div className="form-group">
-          <label>UPI ID *</label>
-          <input
-            type="text"
-            value={requestData.beneficiaryDetails.upiId}
-            onChange={(e) => handleInputChange('beneficiaryDetails.upiId', e.target.value)}
-            required
-            placeholder="merchant@paytm"
-            pattern="[a-zA-Z0-9._-]+@[a-zA-Z]+"
-          />
-          <small style={{ fontSize: '12px', color: '#666' }}>
-            Example: merchant@paytm, user@ybl
-          </small>
-        </div>
-      ) : (
-        <>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Account Holder Name *</label>
-              <input
-                type="text"
-                value={requestData.beneficiaryDetails.accountHolderName}
-                onChange={(e) => handleInputChange('beneficiaryDetails.accountHolderName', e.target.value)}
-                required
-                placeholder="Full name as per bank"
-              />
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Transfer Mode *</label>
+                    <select
+                      value={requestData.transferMode}
+                      onChange={(e) => {
+                        handleInputChange('transferMode', e.target.value);
+                      }}
+                    >
+                      <option value="upi">UPI</option>
+                      <option value="bank_transfer">Bank Transfer</option>
+                    </select>
+                  </div>
+                </div>
+
+                {requestData.transferMode === 'upi' ? (
+                  <div className="form-group">
+                    <label>UPI ID *</label>
+                    <input
+                      type="text"
+                      value={requestData.beneficiaryDetails.upiId}
+                      onChange={(e) => handleInputChange('beneficiaryDetails.upiId', e.target.value)}
+                      required
+                      placeholder="merchant@paytm"
+                      pattern="[a-zA-Z0-9._-]+@[a-zA-Z]+"
+                    />
+                    <small style={{ fontSize: '12px', color: '#666' }}>
+                      Example: merchant@paytm, user@ybl
+                    </small>
+                  </div>
+                ) : (
+                  <>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Account Holder Name *</label>
+                        <input
+                          type="text"
+                          value={requestData.beneficiaryDetails.accountHolderName}
+                          onChange={(e) => handleInputChange('beneficiaryDetails.accountHolderName', e.target.value)}
+                          required
+                          placeholder="Full name as per bank"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Account Number *</label>
+                        <input
+                          type="text"
+                          value={requestData.beneficiaryDetails.accountNumber}
+                          onChange={(e) => handleInputChange('beneficiaryDetails.accountNumber', e.target.value)}
+                          required
+                          placeholder="1234567890123456"
+                          minLength="9"
+                          maxLength="18"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>IFSC Code *</label>
+                        <input
+                          type="text"
+                          value={requestData.beneficiaryDetails.ifscCode}
+                          onChange={(e) => handleInputChange('beneficiaryDetails.ifscCode', e.target.value.toUpperCase())}
+                          required
+                          placeholder="SBIN0001234"
+                          pattern="[A-Z]{4}0[A-Z0-9]{6}"
+                          maxLength="11"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Bank Name</label>
+                        <input
+                          type="text"
+                          value={requestData.beneficiaryDetails.bankName}
+                          onChange={(e) => handleInputChange('beneficiaryDetails.bankName', e.target.value)}
+                          placeholder="State Bank of India"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Branch Name</label>
+                      <input
+                        type="text"
+                        value={requestData.beneficiaryDetails.branchName}
+                        onChange={(e) => handleInputChange('beneficiaryDetails.branchName', e.target.value)}
+                        placeholder="Katraj Branch"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div className="form-group">
+                  <label>Notes</label>
+                  <textarea
+                    value={requestData.notes}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="Optional: Add notes for this payout"
+                    rows="3"
+                  />
+                </div>
+
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowRequestForm(false);
+                      resetForm();
+                    }}
+                    className="secondary-btn"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={requestLoading || !eligibility.can_request_payout}
+                    className="primary-btn"
+                  >
+                    {requestLoading ? 'Processing...' : 'Submit Payout Request'}
+                  </button>
+                </div>
+              </form>
             </div>
-            
-            <div className="form-group">
-              <label>Account Number *</label>
-              <input
-                type="text"
-                value={requestData.beneficiaryDetails.accountNumber}
-                onChange={(e) => handleInputChange('beneficiaryDetails.accountNumber', e.target.value)}
-                required
-                placeholder="1234567890123456"
-                minLength="9"
-                maxLength="18"
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>IFSC Code *</label>
-              <input
-                type="text"
-                value={requestData.beneficiaryDetails.ifscCode}
-                onChange={(e) => handleInputChange('beneficiaryDetails.ifscCode', e.target.value.toUpperCase())}
-                required
-                placeholder="SBIN0001234"
-                pattern="[A-Z]{4}0[A-Z0-9]{6}"
-                maxLength="11"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>Bank Name</label>
-              <input
-                type="text"
-                value={requestData.beneficiaryDetails.bankName}
-                onChange={(e) => handleInputChange('beneficiaryDetails.bankName', e.target.value)}
-                placeholder="State Bank of India"
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Branch Name</label>
-            <input
-              type="text"
-              value={requestData.beneficiaryDetails.branchName}
-              onChange={(e) => handleInputChange('beneficiaryDetails.branchName', e.target.value)}
-              placeholder="Katraj Branch"
-            />
-          </div>
-        </>
-      )}
-
-      <div className="form-group">
-        <label>Notes</label>
-        <textarea
-          value={requestData.notes}
-          onChange={(e) => handleInputChange('notes', e.target.value)}
-          placeholder="Optional: Add notes for this payout"
-          rows="3"
-        />
-      </div>
-
-      <div className="form-actions">
-        <button 
-          type="button" 
-          onClick={() => {
-            setShowRequestForm(false);
-            resetForm();
-          }}
-          className="secondary-btn"
-        >
-          Cancel
-        </button>
-        <button 
-          type="submit" 
-          disabled={requestLoading || !eligibility.can_request_payout}
-          className="primary-btn"
-        >
-          {requestLoading ? 'Processing...' : 'Submit Payout Request'}
-        </button>
-      </div>
-    </form>
-  </div>
-)}
+          )}
 
 
           {loading ? (

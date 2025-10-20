@@ -40,7 +40,7 @@ async triggerManualSettlement() {
 
     console.log('Triggering manual settlement:', API_ENDPOINTS.MANUAL_SETTLEMENT);
 
-    const response = await axios.post(
+    const response = await axios.get(
       API_ENDPOINTS.MANUAL_SETTLEMENT,
       {},
       {
