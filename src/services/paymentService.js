@@ -17,7 +17,97 @@ class PaymentService {
       fallback
     );
   }
-// ✅ Add these methods at the end of PaymentService class
+
+  // ============ SEARCH APIs ============
+  
+  // Search Transactions
+  async searchTransactions(filters = {}) {
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const params = new URLSearchParams();
+      if (filters.merchantId) params.append('merchantId', filters.merchantId);
+      if (filters.minAmount) params.append('minAmount', filters.minAmount);
+      if (filters.maxAmount) params.append('maxAmount', filters.maxAmount);
+      if (filters.startDate) params.append('startDate', filters.startDate);
+      if (filters.endDate) params.append('endDate', filters.endDate);
+      if (filters.description) params.append('description', filters.description);
+      if (filters.transactionId) params.append('transactionId', filters.transactionId);
+      if (filters.orderId) params.append('orderId', filters.orderId);
+      if (filters.customerName) params.append('customerName', filters.customerName);
+      if (filters.customerEmail) params.append('customerEmail', filters.customerEmail);
+      if (filters.customerPhone) params.append('customerPhone', filters.customerPhone);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.paymentGateway) params.append('paymentGateway', filters.paymentGateway);
+      if (filters.paymentMethod) params.append('paymentMethod', filters.paymentMethod);
+      if (filters.search) params.append('search', filters.search); // Global search
+      if (filters.page) params.append('page', filters.page);
+      if (filters.limit) params.append('limit', filters.limit);
+      if (filters.sortBy) params.append('sortBy', filters.sortBy);
+      if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
+
+      const url = `${API_ENDPOINTS.SEARCH_TRANSACTIONS}${params.toString() ? `?${params.toString()}` : ''}`;
+console.log(url);
+
+      const response = await axios.get(url, {
+        headers: {
+          'x-auth-token': `${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Search Transactions Error:', error);
+      throw new Error(this.getApiErrorMessage(error, 'Failed to search transactions'));
+    }
+  }
+
+  // Search Payouts
+  async searchPayouts(filters = {}) {
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const params = new URLSearchParams();
+      if (filters.merchantId) params.append('merchantId', filters.merchantId);
+      if (filters.payoutId) params.append('payoutId', filters.payoutId);
+      if (filters.minAmount) params.append('minAmount', filters.minAmount);
+      if (filters.maxAmount) params.append('maxAmount', filters.maxAmount);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.startDate) params.append('startDate', filters.startDate);
+      if (filters.endDate) params.append('endDate', filters.endDate);
+      if (filters.description) params.append('description', filters.description);
+      if (filters.beneficiaryName) params.append('beneficiaryName', filters.beneficiaryName);
+      if (filters.notes) params.append('notes', filters.notes);
+      if (filters.search) params.append('search', filters.search); // Global search
+      if (filters.page) params.append('page', filters.page);
+      if (filters.limit) params.append('limit', filters.limit);
+      if (filters.sortBy) params.append('sortBy', filters.sortBy);
+      if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
+
+      const url = `${API_ENDPOINTS.SEARCH_PAYOUTS}${params.toString() ? `?${params.toString()}` : ''}`;
+
+      const response = await axios.get(url, {
+        headers: {
+          'x-auth-token': `${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Search Payouts Error:', error);
+      throw new Error(this.getApiErrorMessage(error, 'Failed to search payouts'));
+    }
+  }
+
+  // ============ SUPERADMIN APIs ============
 
   // SuperAdmin: Get all payouts
   async getAllPayouts(filters = {}) {
@@ -50,10 +140,13 @@ class PaymentService {
       throw new Error(this.getApiErrorMessage(error, 'Failed to fetch all payouts'));
     }
   }
- async getTransactionDetail(transactionId) {
+
+  // SuperAdmin: Get transaction detail
+  async getTransactionDetail(transactionId) {
     try {
       const token = authService.getToken();
       if (!token) throw new Error("No authentication token found");
+      
       const url = API_ENDPOINTS.TRANSACTION_DETAIL(transactionId);
       const response = await axios.get(url, {
         headers: {
@@ -65,6 +158,7 @@ class PaymentService {
       throw new Error(error.response?.data?.error || error.message || "Failed to fetch transaction detail");
     }
   }
+
   // SuperAdmin: Approve payout
   async approvePayout(payoutId, notes = '') {
     try {
@@ -143,6 +237,8 @@ class PaymentService {
     }
   }
 
+  // ============ MERCHANT APIs ============
+
   // Get API key for authorization
   async getApiKey() {
     try {
@@ -152,7 +248,7 @@ class PaymentService {
     }
   }
 
-  // Transactions Section - requires API key authorization
+  // Get Transactions - requires API key authorization
   async getTransactions(filters = {}) {
     try {
       const apiKeyData = await this.getApiKey();
@@ -191,15 +287,24 @@ class PaymentService {
     }
   }
 
-  // Payout Section - requires admin authorization (JWT)
-  async getPayouts() {
+  // Get Payouts - requires admin authorization (JWT)
+  async getPayouts(filters = {}) {
     try {
       const token = authService.getToken();
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      const response = await axios.get(API_ENDPOINTS.PAYOUTS, {
+      const params = new URLSearchParams();
+      if (filters.page) params.append('page', filters.page);
+      if (filters.limit) params.append('limit', filters.limit);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.startDate) params.append('startDate', filters.startDate);
+      if (filters.endDate) params.append('endDate', filters.endDate);
+
+      const url = `${API_ENDPOINTS.PAYOUTS}${params.toString() ? `?${params.toString()}` : ''}`;
+
+      const response = await axios.get(url, {
         headers: {
           'x-auth-token': `${token}`,
           'Content-Type': 'application/json',
@@ -213,28 +318,27 @@ class PaymentService {
     }
   }
 
-  // Payin Section - requires JWT authorization
- async getBalance() {
-  try {
-    const token = authService.getToken();
-    if (!token) {
-      throw new Error('No authentication token found');
+  // Get Balance - requires JWT authorization
+  async getBalance() {
+    try {
+      const token = authService.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await axios.get(API_ENDPOINTS.BALANCE, {
+        headers: {
+          'x-auth-token': `${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Balance fetch error:', error);
+      throw new Error(this.getApiErrorMessage(error, 'Failed to fetch balance'));
     }
-
-    const response = await axios.get(API_ENDPOINTS.BALANCE, {
-      headers: {
-        'x-auth-token': `${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    return response.data;
-  } catch (error) {
-    console.error('Balance fetch error:', error);
-    throw new Error(this.getApiErrorMessage(error, 'Failed to fetch balance'));
   }
-}
-
 
   // Create Payment Link - requires API key + body data
   async createPaymentLink(paymentData) {
