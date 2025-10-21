@@ -334,6 +334,7 @@ const TransactionsPage = () => {
                         <th>Amount</th>
                         <th>Net Amount</th>
                         <th>Commission</th>
+                        <th>Description</th> {/* ✅ NEW */}
                         <th>Status</th>
                         <th>Transfer Mode</th>
                         <th>Requested At</th>
@@ -341,27 +342,30 @@ const TransactionsPage = () => {
                         <th>UTR</th>
                       </tr>
                     </thead>
+
                     <tbody>
-                      {payouts.map((payout, index) => (
-                        <tr key={payout.payoutId || index}>
-                          <td className="transaction-id">{payout.payoutId || '-'}</td>
-                          <td className="amount">{formatAmount(payout.amount)}</td>
-                          <td className="amount" style={{ color: '#10b981', fontWeight: 600 }}>
-                            {formatAmount(payout.netAmount)}
-                          </td>
-                          <td className="amount">{formatAmount(payout.commission)}</td>
-                          <td>
-                            <span className={`transaction-status ${getStatusClass(payout.status)}`}>
-                              {payout.status || 'Pending'}
-                            </span>
-                          </td>
-                          <td>{payout.transferMode === 'bank_transfer' ? 'Bank Transfer' : 'UPI'}</td>
-                          <td className="date">{formatDate(payout.requestedAt)}</td>
-                          <td className="date">{formatDate(payout.completedAt)}</td>
-                          <td>{payout.utr || '-'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
+  {payouts.map((payout, index) => (
+    <tr key={payout.payoutId || index}>
+      <td className="transaction-id">{payout.payoutId || '-'}</td>
+      <td className="amount">{formatAmount(payout.amount)}</td>
+      <td className="amount" style={{ color: '#10b981', fontWeight: 600 }}>
+        {formatAmount(payout.netAmount)}
+      </td>
+      <td className="amount">{formatAmount(payout.commission)}</td>
+      <td className="description">{payout.description || '-'}</td> {/* ✅ NEW */}
+      <td>
+        <span className={`transaction-status ${getStatusClass(payout.status)}`}>
+          {payout.status || 'Pending'}
+        </span>
+      </td>
+      <td>{payout.transferMode === 'bank_transfer' ? 'Bank Transfer' : 'UPI'}</td>
+      <td className="date">{formatDate(payout.requestedAt)}</td>
+      <td className="date">{formatDate(payout.completedAt)}</td>
+      <td>{payout.utr || '-'}</td>
+    </tr>
+  ))}
+</tbody>
+
                   </table>
                 </div>
               ) : activeTab === 'payout' && payouts.length === 0 ? (

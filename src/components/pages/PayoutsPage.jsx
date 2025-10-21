@@ -187,46 +187,49 @@ const PayoutsPage = () => {
     setError('');
 
     try {
-      if (!eligibility.can_request_payout) {
-        throw new Error('You are not eligible to request a payout at this time. Wait for settlement to complete.');
-      }
+        if (!eligibility.can_request_payout) {
+            throw new Error('You are not eligible to request a payout at this time. Wait for settlement to complete.');
+        }
 
-      if (!requestData.amount || parseFloat(requestData.amount) <= 0) {
-        throw new Error('Please enter a valid payout amount.');
-      }
+        // ✅ Parse amount properly to avoid precision issues
+        const payoutAmount = parseFloat(requestData.amount);
 
-      if (parseFloat(requestData.amount) > eligibility.maximum_payout_amount) {
-        throw new Error(`The requested amount exceeds your available balance of ${formatCurrency(eligibility.maximum_payout_amount)}.`);
-      }
+        if (!payoutAmount || payoutAmount <= 0) {
+            throw new Error('Please enter a valid payout amount.');
+        }
 
-      const payoutData = {
-        amount: requestData.amount,
-        transferMode: requestData.transferMode,
-        beneficiaryDetails: requestData.transferMode === 'upi'
-          ? { upiId: requestData.beneficiaryDetails.upiId }
-          : {
-            accountNumber: requestData.beneficiaryDetails.accountNumber,
-            ifscCode: requestData.beneficiaryDetails.ifscCode,
-            accountHolderName: requestData.beneficiaryDetails.accountHolderName,
-            bankName: requestData.beneficiaryDetails.bankName,
-            branchName: requestData.beneficiaryDetails.branchName
-          },
-        notes: requestData.notes
-      };
+        if (payoutAmount > eligibility.maximum_payout_amount) {
+            throw new Error(`The requested amount exceeds your available balance of ${formatCurrency(eligibility.maximum_payout_amount)}.`);
+        }
 
-      await paymentService.requestPayout(payoutData);
-      setShowRequestForm(false);
-      setToast({ message: 'Payout request submitted successfully!', type: 'success' });
-      resetForm();
-      fetchPayouts();
-      loadEligibility();
+        const payoutData = {
+            amount: payoutAmount, // ✅ Use parsed number instead of string
+            transferMode: requestData.transferMode,
+            beneficiaryDetails: requestData.transferMode === 'upi'
+                ? { upiId: requestData.beneficiaryDetails.upiId }
+                : {
+                    accountNumber: requestData.beneficiaryDetails.accountNumber,
+                    ifscCode: requestData.beneficiaryDetails.ifscCode,
+                    accountHolderName: requestData.beneficiaryDetails.accountHolderName,
+                    bankName: requestData.beneficiaryDetails.bankName,
+                    branchName: requestData.beneficiaryDetails.branchName
+                },
+            notes: requestData.notes
+        };
+
+        await paymentService.requestPayout(payoutData);
+        setShowRequestForm(false);
+        setToast({ message: 'Payout request submitted successfully!', type: 'success' });
+        resetForm();
+        fetchPayouts();
+        loadEligibility();
     } catch (error) {
-      setError(error.message);
-      setToast({ message: error.message, type: 'error' });
+        setError(error.message);
+        setToast({ message: error.message, type: 'error' });
     } finally {
-      setRequestLoading(false);
+        setRequestLoading(false);
     }
-  };
+};
 
 
 
